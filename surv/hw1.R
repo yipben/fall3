@@ -10,7 +10,7 @@ kat <- read_csv("data/katrina.csv")
 
 # create new variables for later on
 kat <- kat %>%
-  mutate(reason2 = if_else(reason == 0, "survived",
+  mutate(reason3 = if_else(reason == 0, "survived",
                    if_else(reason == 1, "flood", 
                    if_else(reason == 2, "motor", 
                    if_else(reason == 3, "surge", "jammed")))),
