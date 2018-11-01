@@ -1,5 +1,5 @@
 ## fall3
-My code from fall 3 module at the IAA. Classes:
+Code from fall 3 module at the IAA. Classes:
 
 - Clustering (clust) w/ Dr. Matt Wheeler
 - Survival Analysis (surv) w/ Matt Austin
