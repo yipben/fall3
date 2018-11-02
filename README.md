@@ -12,7 +12,7 @@ This repository has a folder for each of the classes in this module (listed abov
 
 ### Set-up
 
-See [GitHub directions for cloning a repository](https://help.github.com/articles/cloning-a-repository/). In steps 6 and 7 note that *../YOUR-USERNAME/YOUR-REPOSITORY* should be *.../yipben/fall3* instead of your personal user and repository names.
+See [GitHub directions for cloning a repository](https://help.github.com/articles/cloning-a-repository/). In steps 6 and 7 note that *.../YOUR-USERNAME/YOUR-REPOSITORY* should be *.../yipben/fall3* instead of your personal user and repository names.
 
 **A note on .gitignore**  
 This file includes the names/file types of things that shouldn't be added to the repository. To ignore a file, simply add its filepath relative to the fall3 directory to '.gitignore'. For example, to ignore the file 'imaginary.txt' in the 'surv' folder you would add the line `surv/imaginary.txt` to the gitignore file. If you want to ignore all of a certain file type (e.g. excel files) across ALL subdirectories you would type `**/*.xlsx`.
