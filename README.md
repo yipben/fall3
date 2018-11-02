@@ -8,7 +8,7 @@ Code from fall 3 module at the IAA. Classes:
 
 ### Repo overview
 
-This repository has a folder for each of the classes in this module (listed above). All code for each homework should be stored in the corresponding class folder. Within each class folder there is also a subfolder called 'data' that contains all the datasets for the given class. The text file called 'files.txt' lists the names of the datasets, what homework/project they correspond to, and where they were obtained from; this should be updated every time a new dataset is added to the folder.
+This repository has a folder for each of the classes in this module (listed above). All code for each homework should be stored in the corresponding class folder (same location as 'empty.txt' files). Within each class folder there is also a subfolder called 'data' that contains all the datasets for the given class. The text file called 'files.txt' lists the names of the datasets, what homework/project they correspond to, and where they were obtained from; this should be updated every time a new dataset is added to the folder.
 
 ### Set-up
 
