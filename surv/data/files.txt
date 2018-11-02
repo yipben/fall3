@@ -1,0 +1,6 @@
+Files in this folder:
+- katrina.csv (hw1)
+- leaders.csv
+- recid.csv
+
+Source: course webpage
