@@ -39,6 +39,6 @@ ggsurvplot(pump_fit, data = pump, conf.int = FALSE, palette = "Set1")
 pump_fit_wreason <- survfit(Surv(time = hour,event = survive == 0) ~ reason, data = pump[pump$reason != 0,])
 reason_labels = c('Flood','Motor','Surge','Jammed')
 ggsurvplot(pump_fit_wreason, conf.int = TRUE, palette = "Set1",legend='top',
-           legend.labs = reason_labels,legend.title = 'Reason for Failure: ')
+           legend.labs = reason_labels,legend.title = 'Reason for Failure: ',xlab='Time (hours)')
 
 
