@@ -33,12 +33,15 @@ pump_fit # median survival time: 45 hours
 # Discuss anything interesting that you find.
 
 # Plot the survival curves for all pumps
-ggsurvplot(pump_fit, data = pump, conf.int = FALSE, palette = "Set1")
+ggsurvplot(pump_fit, data = pump, conf.int = F, palette = "Set1", legend = 'none',
+           xlab='Time (hours)') +
+           ggtitle('Survival Plot for All Pumps')
 
 # group by reason and plot
 pump_fit_wreason <- survfit(Surv(time = hour,event = survive == 0) ~ reason, data = pump[pump$reason != 0,])
 reason_labels = c('Flood','Motor','Surge','Jammed')
 ggsurvplot(pump_fit_wreason, conf.int = TRUE, palette = "Set1",legend='top',
-           legend.labs = reason_labels,legend.title = 'Reason for Failure: ',xlab='Time (hours)')
+           legend.labs = reason_labels,legend.title = 'Reason for Failure: ',
+           xlab='Time (hours)')
 
 
