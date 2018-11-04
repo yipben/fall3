@@ -19,3 +19,5 @@ DrillingCost =
          Oil_Return = X__4,
          Gas_Return = X__5,
          DryWell_Return = X__6)
+DrillingCost = DrillingCost[-nrow(DrillingCost),] #take out 2007
+
