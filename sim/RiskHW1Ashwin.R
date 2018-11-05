@@ -2,6 +2,7 @@ library(data.table)
 library(readxl)
 library(dplyr)
 library(sqldf)
+library(ks)
 
 
 # Read in Files -----------------------------------------------------------
@@ -27,3 +28,35 @@ head(DrillingCost)
 
 drill = sqldf("select Date, AvgCost, Oil_Return, Gas_Return, DryWell_Return  
       from DrillingCost")
+drill = drill[31:47,]
+
+mean(AvgCost)
+oilMean = mean(as.numeric(drill$Oil_Return[2:47]))
+mean(as.numeric(drill$Gas_Return[2:47]))
+mean(as.numeric(drill$DryWell_Return[2:47]))
+sd(AvgCost)
+Oilsd = sd(as.numeric(drill$Oil_Return[2:47]))
+sd(as.numeric(drill$Gas_Return[2:47]))
+sd(as.numeric(drill$DryWell_Return[2:47]))
+
+
+# Kernel Density Estimation -----------------------------------------------
+
+set.seed(112358)
+r <- rnorm(n=10000, mean=oilMean, sd=Oilsd)
+
+
+mean(P1)
+sd(P1)
+
+hist(P1, breaks=50, main='One Year Value Distribution', xlab='Final Value')
+abline(v = 1000, col="red", lwd=2)
+mtext("Initial Inv.", at=1000, col="red")
+
+# Distribution Selection - Kernel Estimation #
+Density.P1 <- density(P1, bw="SJ-ste")
+Density.P1
+
+Est.P1 <- rkde(fhat=kde(P1, h=25.42), n=1000)
+hist(Est.P1, breaks=50, main='Estimated One Year Value Distribution', xlab='Final Value')
+
