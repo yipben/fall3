@@ -52,18 +52,20 @@ median(jammed$hour)
 # fit survival curves
 all_fit <- survfit(Surv(hour, survive == 0) ~ 1, data = kat)
 autoplot(all_fit)
+ggsurvplot(all_fit, conf.int = TRUE, palette = "Set1",legend='top',
+           legend.title = 'Reason for Failure: ',
+           xlab='Time (hours)') # Figure 2
 
-reason_fit <- survfit(Surv(hour, survive == 0) ~ reason2, data = failed)
+reason_fit <- survfit(Surv(hour, survive == 0) ~ reason3, data = failed)
 autoplot(reason_fit)
 
 
 # log-rank tests
-pairwise_survdiff(Surv(hour, survive == 0) ~ reason2, data = failed, rho = 0)
-pairwise_survdiff(Surv(hour, survive == 0) ~ reason2, data = failed, rho = 1)
+pairwise_survdiff(Surv(hour, survive == 0) ~ reason3, data = failed, rho = 0) # Appendix 1
 
 # hazard function
 haz <- kphaz.fit(kat$hour2, kat$failed)
-kphaz.plot(haz)
+kphaz.plot(haz, main = "Overall Hazard") # Figure 3
 
 ggsurvplot(reason_fit, fun = "cumhaz")
 ggsurvplot(all_fit, fun = "cumhaz")
