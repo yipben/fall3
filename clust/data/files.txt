@@ -2,5 +2,5 @@ Files in this folder:
  - calendar.csv (project 1)
  - listings.csv (project 1)
  - reviews.csv (project 1)
- 
+
 Source: course webpage
