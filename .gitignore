@@ -3,4 +3,7 @@
 .DS_Store
 .Rproj.user
 **/.Rhistory
+**/*.docx
+**/*.doc
+*.docx
 
