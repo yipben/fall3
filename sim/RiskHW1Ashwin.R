@@ -3,6 +3,7 @@ library(readxl)
 library(dplyr)
 library(sqldf)
 library(ks)
+library(triangle)
 
 
 # Read in Files -----------------------------------------------------------
@@ -37,37 +38,84 @@ returns = c(drill$Oil_Return, drill$Gas_Return, drill$DryWell_Return)
 drillMean = mean(as.numeric(returns))
 drillSD = sd(as.numeric(returns))
 
-# Kernel Density Estimation -----------------------------------------------
 
-set.seed(112358)
-r <- rnorm(n=10000, mean=drillMean, sd=drillSD)
-P0 <- 2279.80
-P1 <- P0*(1+r)
-rm(drillmeans)
-mean(P1)
-sd(P1)
+# Simulation based on NORMALITY -------------------------------------------
 
-hist(P1, breaks=50, main='One Year Value Distribution', xlab='Final Value')
-abline(v = 1000, col="red", lwd=2)
-mtext("Initial Inv.", at=1000, col="red")
-
-# Distribution Selection - Kernel Estimation #
-Density.P1 <- density(P1, bw="SJ-ste")
-Density.P1
-
-Est.P1 <- rkde(fhat=kde(P1, h=25.42), n=1000)
-hist(Est.P1, breaks=50, main='Estimated One Year Value Distribution', xlab='Final Value')
-
-P30 <- rep(0,10000)
-for(i in 1:10000){
-  P0 <- 1000
-  r <- rnorm(n=1, mean=0.0879, sd=0.1475)
+P2019 <- rep(0,1000000)
+for(i in 1:1000000){
+  P0 <- 2279.80
+  r <- rnorm(n=1, mean=drillMean, sd=drillSD)
   
   Pt <- P0*(1 + r)
   
-  for(j in 1:29){
-    r <- rnorm(n=1, mean=0.0879, sd=0.1475)
+  for(j in 1:5){
+    r <- rnorm(n=1, mean=drillMean, sd=drillSD)
     Pt <- Pt*(1+r)
   }
-  P30[i] <- Pt
+  
+  for(k in 1:3){
+    r <- rtriangle(a=.07, b=.22, c=.0917)
+    Pt <- Pt*(1+r)
+  }  
+  
+  for(k in 1:4){
+    r <- rtriangle(a=.02, b=.06, c=.05)
+    Pt <- Pt*(1+r)
+  }
+  P2019[i] <- Pt
 }
+
+mean(P2019) #8116.84
+sd(P2019)   #3265.73
+summary(P2019) #Median 7606
+
+hist(P2019, breaks=50, main='2019 Value Distribution', xlab='Final Value')
+abline(v = 1000, col="red", lwd=2)
+mtext("Initial Value", at=P0, col="red")
+
+qqplot(P2019)
+
+# Distribution Selection - Kernel Estimation #
+
+set.seed(12345)
+r <- rnorm(n=10000, mean=drillMean, sd=drillSD)
+P1 <- P0*(1+r)
+
+Density.P1 <- density(P1, bw="SJ-ste")
+Density.P1
+
+Est.P1 <- rkde(fhat=kde(P1, h=67.27), n=1000)
+hist(Est.P1, breaks=50, main='Estimated One Year Value Distribution', xlab='Final Value')
+
+# Multiple Input Probability Distributions #
+P2019 <- rep(0,1000000)
+for(i in 1:1000000){
+  P0 <- 2279.80
+  r <- rnorm(n=1, mean=drillMean, sd=drillSD)
+  
+  Pt <- P0*(1 + r)
+  
+  for(j in 1:5){
+    r <- rnorm(n=1, mean=drillMean, sd=drillSD)
+    Pt <- Pt*(1+r)
+  }
+  
+  for(k in 1:3){
+    r <- rtriangle(a=.07, b=.22, c=.0917)
+    Pt <- Pt*(1+r)
+  }  
+  
+  for(k in 1:4){
+    r <- rtriangle(a=.02, b=.06, c=.05)
+    Pt <- Pt*(1+r)
+  }
+  P2019[i] <- Pt
+}
+
+mean(P2019) 
+sd(P2019)   
+summary(P2019) 
+
+hist(P30, breaks=50, main='30 Year Value Distribution', xlab='Final Value')
+abline(v = 1000, col="red", lwd=2)
+mtext("Initial Inv.", at=1000, col="red")
