@@ -5,6 +5,7 @@ library(ggplot2)
 library(survival)
 library(survminer)
 library(ggfortify)
+library(flexsurv)
 
 kat <- read_csv("data/katrina.csv")
 
@@ -94,6 +95,44 @@ flood_fit_loglogist <- survreg(Surv(time = hour, event = reason == 1) ~  backup 
                                  slope + age, data = kat, dist = "loglogistic")
 summary(flood_fit_loglogist)
 exp(coef(flood_fit_loglogist))
+
+# checking distributions visually for each type of distribution
+flood_flex_exponential <- flexsurvreg(Surv(time = hour, event = reason == 1) ~ 
+                                        backup + bridgecrane + servo + trashrack + 
+                                        elevation + slope + age, data = kat, 
+                                        dist = "exponential")
+plot(flood_flex_exponential, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
+     bty = "n", xlab = "hour", ylab = "cumulative hazard",
+     main = "exponential distribution")
+
+flood_flex_weibull <- flexsurvreg(Surv(time = hour, event = reason == 1) ~ 
+                                        backup + bridgecrane + servo + trashrack + 
+                                        elevation + slope + age, data = kat, 
+                                        dist = "weibull")
+plot(flood_flex_weibull, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
+     bty = "n", xlab = "hour", ylab = "weibull hazard",
+     main = "weibull distribution")
+
+flood_flex_lognormal <- flexsurvreg(Surv(time = hour, event = reason == 1) ~ 
+                                    backup + bridgecrane + servo + trashrack + 
+                                    elevation + slope + age, data = kat, 
+                                    dist = "lognormal")
+plot(flood_flex_lognormal, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
+     bty = "n", xlab = "hour", ylab = "lognormal hazard",
+     main = "lognormal distribution")
+
+flood_flex_loglogist <- flexsurvreg(Surv(time = hour, event = reason == 1) ~ 
+                                      backup + bridgecrane + servo + trashrack + 
+                                      elevation + slope + age, data = kat, 
+                                      dist = "llogis")
+plot(flood_flex_loglogist, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
+     bty = "n", xlab = "hour", ylab = "loglogistic hazard",
+     main = "loglogistic distribution")
+
+
+
+
+
 
 
 
