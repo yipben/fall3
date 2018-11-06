@@ -110,7 +110,7 @@ flood_flex_weibull <- flexsurvreg(Surv(time = hour, event = reason == 1) ~
                                         elevation + slope + age, data = kat, 
                                         dist = "weibull")
 plot(flood_flex_weibull, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
-     bty = "n", xlab = "hour", ylab = "weibull hazard",
+     bty = "n", xlab = "hour", ylab = "cumulative hazard",
      main = "weibull distribution")
 
 flood_flex_lognormal <- flexsurvreg(Surv(time = hour, event = reason == 1) ~ 
@@ -118,7 +118,7 @@ flood_flex_lognormal <- flexsurvreg(Surv(time = hour, event = reason == 1) ~
                                     elevation + slope + age, data = kat, 
                                     dist = "lognormal")
 plot(flood_flex_lognormal, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
-     bty = "n", xlab = "hour", ylab = "lognormal hazard",
+     bty = "n", xlab = "hour", ylab = "cumulative hazard",
      main = "lognormal distribution")
 
 flood_flex_loglogist <- flexsurvreg(Surv(time = hour, event = reason == 1) ~ 
@@ -126,13 +126,21 @@ flood_flex_loglogist <- flexsurvreg(Surv(time = hour, event = reason == 1) ~
                                       elevation + slope + age, data = kat, 
                                       dist = "llogis")
 plot(flood_flex_loglogist, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
-     bty = "n", xlab = "hour", ylab = "loglogistic hazard",
+     bty = "n", xlab = "hour", ylab = "cumulative hazard",
      main = "loglogistic distribution")
 
+jammed_with_trashrack_upgr <- jammed %>% filter(trashrack == 0) #new df with potential trashrack upgrade
+nrow(jammed_with_trashrack_upgr)*100/nrow(jammed)# percent of jammed with trashrack upgrade available
+nrow(jammed_with_trashrack_upgr) # total of 49 can get trashrack upgrade
 
+flood_with_pump_upgr <- flood %>% filter(backup == 0)
+nrow(flood_with_pump_upgr)*100/nrow(flood)
+nrow(flood_with_pump_upgr)
 
-
-
+# narrowing down by hour - saving pumps who fail quick is higher priority
+# now total obs between two is 20 ... lets upgrade these!
+jammed_with_trashrack_upgr <- jammed_with_trashrack_upgr %>% filter(hour < 20)
+flood_with_pump_upgr <- flood_with_pump_upgr %>% filter(hour < 10)
 
 
 
