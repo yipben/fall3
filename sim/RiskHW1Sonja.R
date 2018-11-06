@@ -7,8 +7,8 @@ library(triangle)
 
 
 # Read in Files -----------------------------------------------------------
-OilPrice = read_xlsx("C:\\Users\\sonja\\Documents\\Courses\\502 (LA TS Logistic SQL R Python Visualization DataMining)\\Simulations\\Assignments\\HW1\\Analysis_Data.xlsx")
-DrillingCost = read_excel("C:\\Users\\sonja\\Documents\\Courses\\502 (LA TS Logistic SQL R Python Visualization DataMining)\\Simulations\\Assignments\\HW1\\Analysis_Data.xlsx", sheet=2, skip = 2)
+OilPrice = read_xlsx('data/Analysis_data.xlsx')
+DrillingCost = read_excel("data/Analysis_Data.xlsx", sheet=2, skip = 2)
 DrillingCost = DrillingCost[-nrow(DrillingCost),] #take out 2007
 
 # Clean Up Data -----------------------------------------------------------
