@@ -25,27 +25,25 @@ DrillingCost$Date = substr(DrillingCost$Date,1,4)
 DrillingCost$AvgCost = (as.numeric(DrillingCost$Oil_Cost) + as.numeric(DrillingCost$Gas_Cost) + 
            as.numeric(DrillingCost$DryWell_Cost))/3
 head(DrillingCost)
-
+DrillingCost$Return
 drill = sqldf("select Date, AvgCost, Oil_Return, Gas_Return, DryWell_Return  
       from DrillingCost")
-drill = drill[31:47,]
+drill = drill[32:47,]
 
-mean(AvgCost)
-oilMean = mean(as.numeric(drill$Oil_Return[2:47]))
-mean(as.numeric(drill$Gas_Return[2:47]))
-mean(as.numeric(drill$DryWell_Return[2:47]))
-sd(AvgCost)
-Oilsd = sd(as.numeric(drill$Oil_Return[2:47]))
-sd(as.numeric(drill$Gas_Return[2:47]))
-sd(as.numeric(drill$DryWell_Return[2:47]))
 
+# distribution ------------------------------------------------------------
+
+returns = c(drill$Oil_Return, drill$Gas_Return, drill$DryWell_Return)
+drillMean = mean(as.numeric(returns))
+drillSD = sd(as.numeric(returns))
 
 # Kernel Density Estimation -----------------------------------------------
 
 set.seed(112358)
-r <- rnorm(n=10000, mean=oilMean, sd=Oilsd)
-
-
+r <- rnorm(n=10000, mean=drillMean, sd=drillSD)
+P0 <- 2279.80
+P1 <- P0*(1+r)
+rm(drillmeans)
 mean(P1)
 sd(P1)
 
@@ -60,3 +58,16 @@ Density.P1
 Est.P1 <- rkde(fhat=kde(P1, h=25.42), n=1000)
 hist(Est.P1, breaks=50, main='Estimated One Year Value Distribution', xlab='Final Value')
 
+P30 <- rep(0,10000)
+for(i in 1:10000){
+  P0 <- 1000
+  r <- rnorm(n=1, mean=0.0879, sd=0.1475)
+  
+  Pt <- P0*(1 + r)
+  
+  for(j in 1:29){
+    r <- rnorm(n=1, mean=0.0879, sd=0.1475)
+    Pt <- Pt*(1+r)
+  }
+  P30[i] <- Pt
+}
