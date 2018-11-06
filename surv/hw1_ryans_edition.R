@@ -69,3 +69,31 @@ kphaz.plot(haz, main = "Overall Hazard") # Figure 3
 
 ggsurvplot(reason_fit, fun = "cumhaz")
 ggsurvplot(all_fit, fun = "cumhaz")
+
+# fitting of AFT models with different distributions
+flood_fit_exponential <- survreg(Surv(time = hour, event = reason == 1) ~  backup +
+                     bridgecrane + servo + trashrack + elevation +
+                     slope + age, data = kat, dist = "exponential")
+summary(flood_fit_exponential)
+exp(coef(flood_fit_exponential))
+
+flood_fit_weibull <- survreg(Surv(time = hour, event = reason == 1) ~  backup +
+                       bridgecrane + servo + trashrack + elevation +
+                       slope + age, data = kat, dist = "weibull")
+summary(flood_fit_weibull)
+exp(coef(flood_fit_weibull))
+
+flood_fit_lognormal <- survreg(Surv(time = hour, event = reason == 1) ~  backup +
+                               bridgecrane + servo + trashrack + elevation +
+                               slope + age, data = kat, dist = "lognormal")
+summary(flood_fit_lognormal)
+exp(coef(flood_fit_lognormal))
+
+flood_fit_loglogist <- survreg(Surv(time = hour, event = reason == 1) ~  backup +
+                                 bridgecrane + servo + trashrack + elevation +
+                                 slope + age, data = kat, dist = "loglogistic")
+summary(flood_fit_loglogist)
+exp(coef(flood_fit_loglogist))
+
+
+
