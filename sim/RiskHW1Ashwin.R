@@ -26,17 +26,24 @@ DrillingCost$Date = substr(DrillingCost$Date,1,4)
 DrillingCost$AvgCost = (as.numeric(DrillingCost$Oil_Cost) + as.numeric(DrillingCost$Gas_Cost) + 
            as.numeric(DrillingCost$DryWell_Cost))/3
 head(DrillingCost)
-DrillingCost$Return
+
 drill = sqldf("select Date, AvgCost, Oil_Return, Gas_Return, DryWell_Return  
       from DrillingCost")
 drill = drill[32:47,]
 
 
+
 # distribution ------------------------------------------------------------
 
-returns = c(drill$Oil_Return, drill$Gas_Return, drill$DryWell_Return)
-drillMean = mean(as.numeric(returns))
-drillSD = sd(as.numeric(returns))
+returns = as.numeric(c(drill$Oil_Return, drill$Gas_Return, drill$DryWell_Return))
+drillMean = mean(returns)
+drillSD = sd(returns)
+hist(returns)
+
+ggplot(as.data.table(returns), aes(x=(returns))) + 
+  geom_histogram(colour="black", fill="sky blue", bins=10, alpha=.7) + 
+  ylim(c(0,15)) +
+  theme_minimal()
 
 
 # Simulation based on NORMALITY -------------------------------------------
@@ -54,7 +61,7 @@ for(i in 1:1000000){
   }
   
   for(k in 1:3){
-    r <- rtriangle(a=.07, b=.22, c=.0917)
+    r <- rtriangle(a=-.22, b=-.07, c=-.0917)
     Pt <- Pt*(1+r)
   }  
   
@@ -65,57 +72,56 @@ for(i in 1:1000000){
   P2019[i] <- Pt
 }
 
-mean(P2019) #8116.84
-sd(P2019)   #3265.73
-summary(P2019) #Median 7606
+mean(P2019) #3768.79
+sd(P2019)   #3268.98
+summary(P2019) #Median 7604
 
-hist(P2019, breaks=50, main='2019 Value Distribution', xlab='Final Value')
-abline(v = 1000, col="red", lwd=2)
+hist(P2019, breaks=50, main='2019 Value Distribution (Normality Assumption)', xlab='Final Value')
+abline(v = P0, col="red", lwd=2)
 mtext("Initial Value", at=P0, col="red")
 
-qqplot(P2019)
+ggplot(as.data.table(P2019), aes(x=P2019)) + 
+  geom_histogram(colour="black", fill="sky blue", bins=30, alpha=.5) + 
+  xlim(c(0,15000))+
+  labs(title="2019 Simulated Value Distribution (Normality Assumed)", x="Dollars", y="Count")+
+  theme_minimal()+
+  geom_vline(xintercept=P0, color="red", linetype="dashed", size=1)+
+  geom_text(aes(x=1000), label="Value at 2006", y=120000, colour="red", size=12)+
+  theme(axis.text=element_text(sifcze=12), axis.title=element_text(size=14,face="bold"))
+    
 
 # Distribution Selection - Kernel Estimation #
 
-set.seed(12345)
-r <- rnorm(n=10000, mean=drillMean, sd=drillSD)
-P1 <- P0*(1+r)
-
-Density.P1 <- density(P1, bw="SJ-ste")
-Density.P1
-
-Est.P1 <- rkde(fhat=kde(P1, h=67.27), n=1000)
-hist(Est.P1, breaks=50, main='Estimated One Year Value Distribution', xlab='Final Value')
+Density.P1 <- density(as.numeric(returns), bw="SJ-ste")
+Density.P1  #bandwidth = 0.07935
 
 # Multiple Input Probability Distributions #
-P2019 <- rep(0,1000000)
-for(i in 1:1000000){
-  P0 <- 2279.80
-  r <- rnorm(n=1, mean=drillMean, sd=drillSD)
-  
+P2019KDE <- rep(0,100000)
+for(i in 1:100000){
+  P0 <- 2279.80  #value of 2006
+  r <- rkde(fhat=kde(as.numeric(returns), h=0.07935), n=1)   #not sure what to use for n=???
   Pt <- P0*(1 + r)
   
   for(j in 1:5){
-    r <- rnorm(n=1, mean=drillMean, sd=drillSD)
+    r <- rkde(fhat=kde(as.numeric(returns), h=0.07935), n=1)
     Pt <- Pt*(1+r)
   }
   
   for(k in 1:3){
-    r <- rtriangle(a=.07, b=.22, c=.0917)
+    r <- rtriangle(a=-.22, b=-.07, c=-.0917)     
     Pt <- Pt*(1+r)
-  }  
+  }
   
   for(k in 1:4){
     r <- rtriangle(a=.02, b=.06, c=.05)
     Pt <- Pt*(1+r)
   }
-  P2019[i] <- Pt
+  P2019KDE[i] <- Pt
 }
 
-mean(P2019) 
-sd(P2019)   
-summary(P2019) 
+sd(P2019KDE)   
+summary(P2019KDE) 
 
-hist(P30, breaks=50, main='30 Year Value Distribution', xlab='Final Value')
-abline(v = 1000, col="red", lwd=2)
-mtext("Initial Inv.", at=1000, col="red")
+hist(P2019KDE, breaks=50, main='2019 Value Distribution (KDE Assumption)', xlab='Final Value')
+abline(v = P0, col="red", lwd=2)
+mtext("Initial Value", at=P0, col="red")
