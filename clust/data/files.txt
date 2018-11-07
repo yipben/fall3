@@ -1,4 +1,7 @@
 Files in this folder:
 
+- calendar.csv | dates available for each location
+- listings.csv | info on each boston air bnb (includes location)
+- reviews.csv | reviews of boston air bnb's 
 
 Source: course webpage
