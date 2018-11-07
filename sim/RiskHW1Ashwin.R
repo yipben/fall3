@@ -4,6 +4,7 @@ library(dplyr)
 library(sqldf)
 library(ks)
 library(triangle)
+library(ggplot2)
 
 
 # Read in Files -----------------------------------------------------------
@@ -48,7 +49,8 @@ ggplot(as.data.table(returns), aes(x=(returns))) +
 
 # Simulation based on NORMALITY -------------------------------------------
 
-P2019 <- rep(0,1000000)
+set.seed(12345)
+P2019 <- rep(0,100000)
 for(i in 1:1000000){
   P0 <- 2279.80
   r <- rnorm(n=1, mean=drillMean, sd=drillSD)
@@ -82,12 +84,13 @@ mtext("Initial Value", at=P0, col="red")
 
 ggplot(as.data.table(P2019), aes(x=P2019)) + 
   geom_histogram(colour="black", fill="sky blue", bins=30, alpha=.5) + 
-  xlim(c(0,15000))+
+  xlim(c(0,25000))+
   labs(title="2019 Simulated Value Distribution (Normality Assumed)", x="Dollars", y="Count")+
   theme_minimal()+
   geom_vline(xintercept=P0, color="red", linetype="dashed", size=1)+
-  geom_text(aes(x=1000), label="Value at 2006", y=120000, colour="red", size=12)+
-  theme(axis.text=element_text(sifcze=12), axis.title=element_text(size=14,face="bold"))
+  geom_text(aes(x=700), label="Value at 2006", y=85000)+
+  theme(axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold"),
+        plot.title = element_text(hjust = 0.5, size=16))
     
 
 # Distribution Selection - Kernel Estimation #
@@ -99,11 +102,11 @@ Density.P1  #bandwidth = 0.07935
 P2019KDE <- rep(0,100000)
 for(i in 1:100000){
   P0 <- 2279.80  #value of 2006
-  r <- rkde(fhat=kde(as.numeric(returns), h=0.07935), n=1)   #not sure what to use for n=???
+  r <- rkde(fhat=kde(returns, h=0.07935), n=1)   #not sure what to use for n=???
   Pt <- P0*(1 + r)
   
   for(j in 1:5){
-    r <- rkde(fhat=kde(as.numeric(returns), h=0.07935), n=1)
+    r <- rkde(fhat=kde(returns, h=0.07935), n=1)
     Pt <- Pt*(1+r)
   }
   
