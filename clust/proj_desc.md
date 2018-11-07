@@ -34,6 +34,7 @@ Your Goals are as follows:
     c.	Average nightly rates per segment (possibly per bed). 
     
 2.	Give a report that describes each segment and possible opportunities that may be available to her. 
+
 Deliverable: 
 Your client knows nothing about statistics or clustering. Your goal is to convey all of the relevant information to her in 6 or fewer pages (12pt).  The first page should be an executive summary with your main conclusions, and the following pages should give segment descriptions as well as useful information that will aid her in her decision making process.
 
