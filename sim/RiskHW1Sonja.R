@@ -29,7 +29,7 @@ DrillingCost =
               #from DrillingCost")
 #drill = drill[32:47,]
 
-DrillingCost = DrillingCost[32:47,]
+DrillingCost = DrillingCost[32:47,] # 91 - 2006
 All_Return=c(DrillingCost$Oil_Return,DrillingCost$Gas_Return,DrillingCost$DryWell_Return)
 
 #Histogram of actual returns
