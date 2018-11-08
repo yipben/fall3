@@ -7,3 +7,4 @@ The point of this document is to record all steps taken over the course of this 
 
 *8 November*
 - edited merge.R so that list_rev.csv only includes listings with more than three reviews (as per Wheeler's example)
+

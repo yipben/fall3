@@ -1,6 +1,8 @@
 library(readr)
 library(dplyr)
 
+# Only need to run once
+
 list <- read_csv("data/listings.csv")
 rev <- read_csv("data/reviews.csv")
 
