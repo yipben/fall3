@@ -37,6 +37,7 @@ cos <- 1 - sim2(as.matrix(dtm), method = "cosine", norm = "l2")
 
 # OPTIONAL: join listing info before clustering
 
+# dm = distance matrix (e.g. cos)
 join_list <- function(dm) {
   df <- as_data_frame(dm)
   col_nms <- colnames(df)
@@ -52,4 +53,4 @@ cos_list <- join_list(cos)
 
 # cluster away!
 test <- hclust(as.dist(cos), method = "complete")
-
+plot(test)
