@@ -4,3 +4,6 @@ The point of this document is to record all steps taken over the course of this 
 
 *7 November*
 - Left joined listings.csv onto reviews.csv. This adds locational data and other fields to the reviews for use in clustering. (list_rev.csv, merge.R)
+
+*8 November*
+- edited merge.R so that list_rev.csv only includes listings with more than three reviews (as per Wheeler's example)
