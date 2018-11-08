@@ -41,17 +41,26 @@ drillMean = mean(returns)
 drillSD = sd(returns)
 hist(returns)
 
-ggplot(as.data.table(returns), aes(x=(returns))) + 
-  geom_histogram(colour="black", fill="sky blue", bins=10, alpha=.7) + 
-  ylim(c(0,15)) +
-  theme_minimal()
+ggplot(as.data.table(returns), aes(x=returns)) + 
+  geom_histogram(colour="black", fill="sky blue", alpha=.7, bins=10) + 
+  theme_minimal()+
+  labs(title="Distribution of Returns\n", x="\n%Change", y="Count\n")+
+  theme(axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold"),
+        plot.title = element_text(hjust = 0.5, size=16))
 
+qplot(sample=returns, data=as.data.table(returns))+
+  theme_minimal()+
+  stat_qq_line(color="blue")+
+  labs(title="Q-Q Plot\n", x="\nTheoretical Quantiles", y="Sample Quantiles\n")+
+  theme(axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold"),
+        plot.title = element_text(hjust = 0.5, size=16))
 
+  
 # Simulation based on NORMALITY -------------------------------------------
 
 set.seed(12345)
 P2019 <- rep(0,100000)
-for(i in 1:1000000){
+for(i in 1:100000){
   P0 <- 2279.80
   r <- rnorm(n=1, mean=drillMean, sd=drillSD)
   
@@ -84,11 +93,11 @@ mtext("Initial Value", at=P0, col="red")
 
 ggplot(as.data.table(P2019), aes(x=P2019)) + 
   geom_histogram(colour="black", fill="sky blue", bins=30, alpha=.5) + 
-  xlim(c(0,25000))+
-  labs(title="2019 Simulated Value Distribution (Normality Assumed)", x="Dollars", y="Count")+
+  xlim(c(0,15000))+
+  labs(title="2019 Simulated Value Distribution (Normality Assumed)\n", x="\nDollars", y="Count\n")+
   theme_minimal()+
   geom_vline(xintercept=P0, color="red", linetype="dashed", size=1)+
-  geom_text(aes(x=700), label="Value at 2006", y=85000)+
+  geom_text(aes(x=700), label="Value at 2006", y=13000)+
   theme(axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold"),
         plot.title = element_text(hjust = 0.5, size=16))
     
@@ -128,3 +137,13 @@ summary(P2019KDE)
 hist(P2019KDE, breaks=50, main='2019 Value Distribution (KDE Assumption)', xlab='Final Value')
 abline(v = P0, col="red", lwd=2)
 mtext("Initial Value", at=P0, col="red")
+
+ggplot(as.data.table(P2019KDE), aes(x=P2019KDE)) + 
+  geom_histogram(colour="black", fill="sky blue", bins=30, alpha=.5) + 
+  xlim(c(0,18000))+
+  labs(title="2019 Simulated Value Distribution Using KDE)\n", x="\nDollars", y="Count\n")+
+  theme_minimal()+
+  geom_vline(xintercept=P0, color="red", linetype="dashed", size=1)+
+  geom_text(aes(x=700), label="Value at 2006", y=13000)+
+  theme(axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold"),
+        plot.title = element_text(hjust = 0.5, size=16))
