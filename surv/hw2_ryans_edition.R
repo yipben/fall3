@@ -243,7 +243,7 @@ results_trashrack <- kat_notrashrack %>%
   select(ID, surv_prob, old_time, new_time, pred_time_diff)
 results_trashrack = arrange(results_trashrack, desc(pred_time_diff))
 
-
+# upgrade wells with highest pred_time_diff & new_time below 48
 results_backup[22:37, ]
 results_bridgecrane[1:15, ] # all negative, useless
 results_servo[27:52, ]
