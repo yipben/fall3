@@ -4,8 +4,10 @@ library(dplyr)
 library(tidytext)
 library(text2vec)
 
+
 list <- read_csv("data/listings.csv")
 rev <- read_csv("data/reviews.csv")
+
 
 # keep listings with more than three reviews
 three_plus <- rev %>%
@@ -28,27 +30,24 @@ dtm <- word_per_row %>%
   count(listing_id, word) %>%
   cast_dtm(listing_id, word, n)
 # inspect(dtm) # uncomment line to view contents of dtm
+m <- as.matrix(dtm)
+
+
+# OPTIONAL: join lat and lon before calculating dist
+# Note: unsure if this is valid or not!
+rw_nms <- rownames(m)
+lat_lon <- list %>%
+  filter(id %in% rw_nms) %>%
+  select(latitude, longitude) %>%
+  as.matrix() %>%
+  scale()
+m_lat_lon <- cbind(m, lat_lon)
 
 
 # calculate distances
-cos <- 1 - sim2(as.matrix(dtm), method = "cosine", norm = "l2")
+cos <- 1 - sim2(m, method = "cosine", norm = "l2")
+cos_lat_lon <- 1 - sim2(m_lat_lon, method = "cosine", norm = "l2")
 # jac <- 1 - sim2(as.matrix(dtm), method = "jaccard", norm= "none")
-
-
-# OPTIONAL: join listing info before clustering
-
-# dm = distance matrix (e.g. cos)
-join_list <- function(dm) {
-  df <- as_data_frame(dm)
-  col_nms <- colnames(df)
-  df <- df %>%
-    mutate(listing_id = parse_integer(col_nms)) %>%
-    rename_at(col_nms, funs(paste0("dist2_", .))) %>%
-    select(listing_id, contains("dist2_"))
-  left_join(df, list, by = c("listing_id" = "id"))
-}
-
-cos_list <- join_list(cos)
 
 
 # cluster away!
