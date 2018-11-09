@@ -130,8 +130,9 @@ flood_flex_lognormal <- flexsurvreg(Surv(time = hour, event = reason == 1) ~
                                     elevation + slope + age, data = kat, 
                                     dist = "lognormal")
 plot(flood_flex_lognormal, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
-     bty = "n", xlab = "hour", ylab = "cumulative hazard",
-     main = "lognormal distribution")
+     bty = "n", xlab = "Hour", ylab = "Cumulative Hazard",
+     main = "Lognormal Distribution",cex.lab=1.25)
+
 ###                                   ###
 # get coefficient estimates
 summary(flood_fit_lognormal)
@@ -259,3 +260,26 @@ upgrade_backup_id = c(364, 427, 322, 325, 376, 367)
 upgrade_servo_id = c(319, 321, 408, 404, 399, 403, 377, 368, 416, 346, 
                      353, 384, 412, 406)
 upgr_pmp_id = c(upgrade_backup_id, upgrade_servo_id)
+
+upgr_backup = results_backup_sub %>% filter(ID == upgrade_backup_id)
+upgr_servo = results_servo_sub %>% filter(ID == upgrade_servo_id)
+upgr_these_20 = rbind(upgr_backup, upgr_servo)
+mean(upgr_these_20$pred_time_diff) # upgrading these pumps gives an average increase of 12.9 hours
+
+upgr_these_20 %>% arrange(ID)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
