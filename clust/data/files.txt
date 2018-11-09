@@ -1,6 +1,8 @@
 Files in this folder:
- - calendar.csv (project 1)
- - listings.csv (project 1)
- - reviews.csv (project 1)
+
+- calendar.csv | dates available for each location
+- listings.csv | info on each boston air bnb (includes location)
+- reviews.csv | reviews of boston air bnb's 
+- list_rev.csv | reviews joined with listings (merge.R)
 
 Source: course webpage
