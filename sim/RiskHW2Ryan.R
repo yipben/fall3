@@ -137,10 +137,10 @@ sd(results)
 ### year 0 expenses ###
 
 # seismic and lease costs
-leasedAcresPerWell_m = 600
+leasedAcresPerWell_m = 600 # normal
 leasedAcresPerWell_std = 50
 pricePerAcre = 960
-seismicSectionsPerWell_m = 3
+seismicSectionsPerWell_m = 3 # normal
 seismicSectionsPerWell_std = 0.35
 pricePerSeismicSection = 43000
 
@@ -150,7 +150,7 @@ pricePerWellPrep_std = 50000
 
 # professional overhead costs - triangular distribution
 # include these for year 0 and each additional year
-profMostLikelyCost = 215000
+profMostLikelyAvg = 215000
 profMostLikelyMin = 172000
 profMostLikelyMax = 279500
 ### end year 0 expenses ###
@@ -167,11 +167,41 @@ initProd_declineRate_corr = 0.64
 ### revenue risk ###
 
 # load csv for price projections
+# used to build distributions for the next 15 years
+# (2019, 2020, 2021, ...) use triangle distribution
+priceProjections_df = read_excel("data/Analysis_Data.xlsx", sheet=1, skip = 2) %>%
+  rename(oil_high = "High Oil Price",
+         oil_low = "Low Oil Price",
+         oil_expected = "AEO2018 Reference")
+revenueInterestRate_m = 0.75
+revenueInterestRate_std = 0.02 # per well for life of well
+# oil price * annual production * revenueInterestRate * taxExpense= annual revenue
 ### end revenue risk ###
 
+### operating (production) expenses ### 
 
+operatingCPB_m = 2.25 # these should be the same for each well in a given year,
+operatingCPB_std = 0.30 # but change year to year according to normal distribution
+taxExpense = 0.046
+### end operating (production) expenses ###
 
+wacc = 0.10 # weighted average cost of capital 
 
+### cost of a single dry well ### 
+numberOfIterations = 10000
+resultsDryWell <- rep(0,numberOfIterations)
+for (i in 1:numberOfIterations){
+  leasedAcres = rnorm(n = 1, mean = leasedAcresPerWell_m, sd = leasedAcresPerWell_std)
+  seismicSections = rnorm(n = 1, mean = seismicSectionsPerWell_m, 
+                          sd = seismicSectionsPerWell_std)
+  professionalCost = rtriangle(n=1, profMostLikelyMin, profMostLikelyMax, 
+                               profMostLikelyAvg)
+  costOfDryWell = (pricePerAcre * leasedAcres) + 
+                  (pricePerSeismicSection * seismicSections) + 
+                   professionalCost
+  resultsDryWell[i] = costOfDryWell
+}
+hist(resultsDryWell)
 
 
 
