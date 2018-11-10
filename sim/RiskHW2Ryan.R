@@ -189,10 +189,10 @@ operatingCPB_std = 0.30 # but change year to year according to normal distributi
 taxExpense = 0.046
 ### end operating (production) expenses ###
 
-wacc = 0.10 # weighted average cost of capital 
+wacc = 1.10 # weighted average cost of capital 
 
 ### cost of a single dry well ### 
-numberOfIterations = 10000
+numberOfIterations = 1000
 resultsDryWell <- rep(0,numberOfIterations)
 for (i in 1:numberOfIterations){
   leasedAcresPerWell = rnorm(n = 1, mean = leasedAcresPerWell_m, sd = leasedAcresPerWell_std)
@@ -247,11 +247,15 @@ corrStruct <- t(corrStruct) # we now have a correlated matrix :)
 
 initProd_declineRate_final <- cbind(destandardize(corrStruct[,1], initProductionBOPD), destandardize(corrStruct[,2], rateOfDecline))
 
-priceProjections <- rep(0,years_ahead)
-revenueInterestRate <- rep(0,years_ahead)
-yearlyProduction = rep(0,years_ahead)
-priceProjections_df = priceProjections_df[1:years_ahead, ]
-for(i in 1:years_ahead){
+netPresentValue = rep(0, numberOfIterations)
+for(j in 1:numberOfIterations){
+  yearEndRate <- rep(0, years_ahead)
+  priceProjections <- rep(0, years_ahead)
+  revenueInterestRate <- rep(0, years_ahead)
+  yearlyProduction = rep(0, years_ahead)
+  priceProjections_df = priceProjections_df[1:years_ahead, ]
+  operatingCPB = rnorm(n = years_ahead, mean = operatingCPB_m, sd = operatingCPB_std)
+  for(i in 1:years_ahead){
   yearEndRate[i] = (1 - initProd_declineRate_final[i, 2]) * initProd_declineRate_final[i, 1]
   yearlyProduction[i] = 365 * ((initProd_declineRate_final[i, 1] + yearEndRate[i]) / 2)
   priceProjections[i] = rtriangle(n = 1, as.numeric(priceProjections_df[i,3]),
@@ -259,15 +263,22 @@ for(i in 1:years_ahead){
                                   as.numeric(priceProjections_df[i,4]))
   revenueInterestRate[i] = rnorm(n = 1, mean = revenueInterestRate_m,
                                  sd = revenueInterestRate_std)
-  leasedAcresPerWell = rnorm(n = 1, mean = leasedAcresPerWell_m, sd = leasedAcresPerWell_std)
+  }
+  operatingCosts = operatingCPB * yearlyProduction
+  acresCosts = leasedAcresPerWell * pricePerAcre
+  seismicSectionsCosts = seismicSectionsPerWell * pricePerSeismicSection
   
+  annualRevenues =  (1 - taxExpense) * revenueInterestRate * (priceProjections * yearlyProduction)
+  netSales = annualRevenues - operatingCosts - acresCosts - seismicSectionsCosts - completionCost
+  
+  initialCosts = seismicSectionsCosts + acresCosts + completionCost + professionalCost
+  result1 = rep(0,years_ahead)
+  for(i in 1:years_ahead){
+    result1[i] = annualRevenues[i]/wacc^i
+  }
+  netPresentValue[j] = -initialCosts + sum(result1)
 }
-operatingCPB = rnorm(n = years_ahead, mean = operatingCPB_m, sd = operatingCPB_std)
-operatingCosts = operatingCPB * yearlyProduction
-
-annualRevenues =  taxExpense * revenueInterestRate * (priceProjections * yearlyProduction)
-netSales = annualRevenues - operatingCosts
-
+hist(netPresentValue)
 
 
 
