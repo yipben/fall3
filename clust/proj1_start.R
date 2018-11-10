@@ -3,6 +3,7 @@ library(readr)
 library(dplyr)
 library(tidytext)
 library(text2vec)
+library(factoextra)
 
 
 list <- read_csv("data/listings.csv")
@@ -49,6 +50,9 @@ score_loc_df <- list %>%
   mutate(latitude = scale(latitude), 
          longitude = scale(longitude), 
          avg_score = scale(avg_score))
+set.seed(4151)
+score_loc_samp <- score_loc_df %>%
+  sample_n(100)
   
 
 # CLUSTERING ==================================================================
@@ -60,13 +64,13 @@ cos <- 1 - sim2(m, method = "cosine", norm = "l2")
 # jac <- 1 - sim2(as.matrix(dtm), method = "jaccard", norm= "none")
 
 # selecting k
-fviz_nbclust(m_samp, hcut, k.max = 20, method = "wss") # no clear elbow
-fviz_nbclust(m_samp, hcut, k.max = 30, nboot = 10, method = "gap") # 
-fviz_nbclust(m_samp, hcut, k.max = 20, method = "silhouette")
+fviz_nbclust(m_samp, hcut, k.max = 10, method = "wss") # no clear elbow
+fviz_nbclust(m_samp, hcut, k.max = 10, nboot = 20, method = "gap") # no drop at 10
+fviz_nbclust(m_samp, hcut, k.max = 10, method = "silhouette") # 2 clusters
 
 fviz_nbclust(m_samp, kmeans, k.max = 20, method = "wss") # no clear elbow
 fviz_nbclust(m_samp, kmeans, k.max = 10, nboot = 10, method = "gap")
-fviz_nbclust(m_samp, kmeans, k.max = 20, method = "silhouette")
+fviz_nbclust(m_samp, kmeans, k.max = 20, method = "silhouette") 
 
 # clustering based on location and sentiment score -----------------------------
 
