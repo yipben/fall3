@@ -6,6 +6,7 @@ library(dplyr)
 library(sqldf)
 library(ks)
 library(triangle)
+library(ExtDist)
 
 
 # Read in Files -----------------------------------------------------------
@@ -133,6 +134,7 @@ sd(results)
 #       HW2                                                            #
 #                                                                      #
 ########################################################################
+years_ahead = 15
 
 ### year 0 expenses ###
 
@@ -160,8 +162,10 @@ profMostLikelyMax = 279500
 # follow lognormal distribution with underlying  normal disttribution
 # mean = 6, std = 0.28
 initProd_m = 420 # barrels of oil per day
-initProd_std = 120 
+initProd_std = 120
 initProd_declineRate_corr = 0.64
+rateOfDecline_a = 0.15
+rateOfDecline_b = 0.32
 ### end production risk ###
 
 ### revenue risk ###
@@ -191,17 +195,114 @@ wacc = 0.10 # weighted average cost of capital
 numberOfIterations = 10000
 resultsDryWell <- rep(0,numberOfIterations)
 for (i in 1:numberOfIterations){
-  leasedAcres = rnorm(n = 1, mean = leasedAcresPerWell_m, sd = leasedAcresPerWell_std)
-  seismicSections = rnorm(n = 1, mean = seismicSectionsPerWell_m, 
+  leasedAcresPerWell = rnorm(n = 1, mean = leasedAcresPerWell_m, sd = leasedAcresPerWell_std)
+  seismicSectionsPerWell = rnorm(n = 1, mean = seismicSectionsPerWell_m, 
                           sd = seismicSectionsPerWell_std)
   professionalCost = rtriangle(n=1, profMostLikelyMin, profMostLikelyMax, 
                                profMostLikelyAvg)
-  costOfDryWell = (pricePerAcre * leasedAcres) + 
-                  (pricePerSeismicSection * seismicSections) + 
+  costOfDryWell = (pricePerAcre * leasedAcresPerWell) + 
+                  (pricePerSeismicSection * seismicSectionsPerWell) + 
                    professionalCost
   resultsDryWell[i] = costOfDryWell
 }
 hist(resultsDryWell)
+
+### net present value of a single wet well ###
+leasedAcresPerWell = rnorm(n = 1, mean = leasedAcresPerWell_m, sd = leasedAcresPerWell_std)
+seismicSectionsPerWell = rnorm(n = 1, mean = seismicSectionsPerWell_m, 
+                        sd = seismicSectionsPerWell_std)
+professionalCost = rtriangle(n=1, profMostLikelyMin, profMostLikelyMax, 
+                             profMostLikelyAvg)
+completionCost = rnorm(n = 1, mean = pricePerWellPrep_m, sd = pricePerWellPrep_std)
+
+# fancy stuff to make lognormal draws work
+location <- log(initProd_m^2 / sqrt(initProd_std^2 + initProd_m^2))
+shape <- sqrt(log(1 + (initProd_std^2 / initProd_m^2)))
+print(paste("location:", location))
+print(paste("shape:", shape))
+initProductionBOPD <- rlnorm(n = years_ahead, location, shape) # lognormal draw
+rateOfDecline = runif(n = years_ahead, min = rateOfDecline_a, max = rateOfDecline_b)
+
+R <- matrix(data=cbind(1, 0.64, 0.64, 1), nrow=2)
+U <- t(chol(R)) # choleski decomposition the matrix i need to multiply my data by to get the correlated output, t is transpose
+#Perc.B <- 0.7 # percent in bonds
+#Perc.S <- 0.3 # % in stocks
+#Initial <- 1000 # initial investment
+
+# correlation matrix assumes var = 1, so we must standardize
+standardize <- function(x){
+  x.std = (x - mean(x))/sd(x)
+  return(x.std)
+}
+# so that the answer is not in standard dollars, we want real $ 
+destandardize <- function(x.std, x){
+  x.old = (x.std * sd(x)) + mean(x)
+  return(x.old)
+}
+
+
+initProd_decRate_standard = cbind(standardize(initProductionBOPD), standardize(rateOfDecline))
+corrStruct <- U %*% t(initProd_decRate_standard) # multiplying, altering data to bring in the correlation structure, %*% : matrix multiplication
+corrStruct <- t(corrStruct) # we now have a correlated matrix :)
+
+initProd_declineRate_final <- cbind(destandardize(corrStruct[,1], initProductionBOPD), destandardize(corrStruct[,2], rateOfDecline))
+
+priceProjections <- rep(0,years_ahead)
+revenueInterestRate <- rep(0,years_ahead)
+yearlyProduction = rep(0,years_ahead)
+priceProjections_df = priceProjections_df[1:years_ahead, ]
+for(i in 1:years_ahead){
+  yearEndRate[i] = (1 - initProd_declineRate_final[i, 2]) * initProd_declineRate_final[i, 1]
+  yearlyProduction[i] = 365 * ((initProd_declineRate_final[i, 1] + yearEndRate[i]) / 2)
+  priceProjections[i] = rtriangle(n = 1, as.numeric(priceProjections_df[i,3]),
+                                  as.numeric(priceProjections_df[i,2]), 
+                                  as.numeric(priceProjections_df[i,4]))
+  revenueInterestRate[i] = rnorm(n = 1, mean = revenueInterestRate_m,
+                                 sd = revenueInterestRate_std)
+  leasedAcresPerWell = rnorm(n = 1, mean = leasedAcresPerWell_m, sd = leasedAcresPerWell_std)
+  
+}
+operatingCPB = rnorm(n = years_ahead, mean = operatingCPB_m, sd = operatingCPB_std)
+operatingCosts = operatingCPB * yearlyProduction
+
+annualRevenues =  taxExpense * revenueInterestRate * (priceProjections * yearlyProduction)
+netSales = annualRevenues - operatingCosts
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## revenue risk ##
+priceProjections <- rep(0,years_ahead)
+revenueInterestRate <- rep(0,years_ahead)
+priceProjections_df = priceProjections_df[1:years_ahead, ]
+for(i in 1:years_ahead){
+  priceProjections[i] = rtriangle(n = 1, as.numeric(priceProjections_df[i,3]),
+                                       as.numeric(priceProjections_df[i,2]), 
+                                       as.numeric(priceProjections_df[i,4]))
+  revenueInterestRate[i] = rnorm(n = 1, mean = revenueInterestRate_m,
+                              sd = revenueInterestRate_std)
+}
+hist(priceProjections)
+
+## operating expenses ##
+operatingCPB = rnorm(n = years_ahead, mean = operatingCPB_m, sd = operatingCPB_std)
+
+
 
 
 
