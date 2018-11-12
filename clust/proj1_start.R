@@ -108,11 +108,24 @@ l2dist <- score_loc_df %>%
 # selecting k
 # fviz_nbclust(score_loc_samp[, 2:5], hcut, k.max = 20, method = "wss") # no clear elbow
 # fviz_nbclust(score_loc_samp[, 2:5], hcut, k.max = 20, method = "gap") # drops after 3
-fviz_nbclust(score_loc_samp[, 2:5], hcut, k.max = 20, method = "silhouette") # drop after 3
+fviz_nbclust(score_loc_samp[, 2:5], hcut, k.max = 20, method = "silhouette", hc_method = "ward.D2") # drop after 3
 
-# fviz_nbclust(score_loc_samp[, 2:5], kmeans, k.max = 20, method = "wss") 
+# fviz_nbclust(score_loc_samp[, 2:5], kmeans, k.max = 20, method = "wss")
 # fviz_nbclust(score_loc_samp[, 2:5], kmeans, k.max = 20, method = "gap") # drops after 2
-# fviz_nbclust(score_loc_samp[, 2:5], kmeans, k.max = 20, method = "silhouette") 
+# fviz_nbclust(score_loc_samp[, 2:5], kmeans, k.max = 20, method = "silhouette")
 
-hclust <- hclust(l2dist)
-plot(hclust)
+h_comp <- hclust(l2dist, method = "complete")
+h_ward <- hclust(l2dist, method = "ward.D2")
+
+h_comp_2 <- cutree(h_comp, 2) 
+h_ward_4 <- cutree(h_comp, 4)
+
+clusters <- data_frame(id = score_loc_df$id, 
+                       h_comp_2 = h_comp_2,
+                       h_ward_4 = h_ward_4,
+                       score = as.vector (score_loc_df$avg_score))
+write_csv(clusters, "clusters.csv")
+
+
+
+
