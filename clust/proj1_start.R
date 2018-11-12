@@ -102,14 +102,17 @@ score_loc_samp <- score_loc_df %>%
 # clustering based on location and sentiment score -----------------------------
 
 l2dist <- score_loc_df %>%
-  select(latitude, longitude, avg_score) %>%
+  select(-id) %>%
   dist(method = "euclidean") 
 
 # selecting k
-fviz_nbclust(score_loc_samp[, 2:4], hcut, k.max = 20, method = "wss") # no clear elbow
-fviz_nbclust(score_loc_samp[, 2:4], hcut, k.max = 20, method = "gap") # drops after 3
-fviz_nbclust(score_loc_samp[, 2:4], hcut, k.max = 20, method = "silhouette") # drop after 3
+# fviz_nbclust(score_loc_samp[, 2:5], hcut, k.max = 20, method = "wss") # no clear elbow
+# fviz_nbclust(score_loc_samp[, 2:5], hcut, k.max = 20, method = "gap") # drops after 3
+fviz_nbclust(score_loc_samp[, 2:5], hcut, k.max = 20, method = "silhouette") # drop after 3
 
-fviz_nbclust(score_loc_samp[, 2:4], kmeans, k.max = 20, method = "wss") 
-fviz_nbclust(score_loc_samp[, 2:4], kmeans, k.max = 20, method = "gap") # drops after 2
-fviz_nbclust(score_loc_samp[, 2:4], kmeans, k.max = 20, method = "silhouette") 
+# fviz_nbclust(score_loc_samp[, 2:5], kmeans, k.max = 20, method = "wss") 
+# fviz_nbclust(score_loc_samp[, 2:5], kmeans, k.max = 20, method = "gap") # drops after 2
+# fviz_nbclust(score_loc_samp[, 2:5], kmeans, k.max = 20, method = "silhouette") 
+
+hclust <- hclust(l2dist)
+plot(hclust)
