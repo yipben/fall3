@@ -270,18 +270,60 @@ upgr_these_20 %>% arrange(ID)
 
 ######################## HW3 ######################## 
 
+# Provide a follow-up to your last report and a set of recommendations summarizing 
+# the findings from your analysis. In this assignment, you will model motor and surge 
+# failures together and treat all other failure reasons as censored.
+# In R, do Surv(time = hour, event = reason %in% c(2, 3)).
+
 # Create both an AFT model and a Cox regression model with the following variables:
 # backup, bridgecrane, servo, trashrack, elevation, slope, age. Which of these models 
 # do you prefer? Why?
 
+# none of these fit well
+aft_fit <- flexsurvreg(Surv(time = hour, event = reason %in% c(2, 3)) ~ 
+                                      backup + bridgecrane + servo + trashrack + 
+                                      elevation + slope + age, data = kat, 
+                                    dist = "lognormal")
+plot(aft_fit, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
+     bty = "n", xlab = "Hour", ylab = "Cumulative Hazard",
+     main = "Lognormal Distribution",cex.lab=1.25)
 
-  
+aft_fit1 <- flexsurvreg(Surv(time = hour, event = reason %in% c(2, 3)) ~ 
+                         backup + bridgecrane + servo + trashrack + 
+                         elevation + slope + age, data = kat, 
+                       dist = "llogis")
+plot(aft_fit1, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
+     bty = "n", xlab = "Hour", ylab = "Cumulative Hazard",
+     main = "Log logistic Distribution",cex.lab=1.25)
 
+aft_fit2 <- flexsurvreg(Surv(time = hour, event = reason %in% c(2, 3)) ~ 
+                         backup + bridgecrane + servo + trashrack + 
+                         elevation + slope + age, data = kat, 
+                       dist = "weibull")
+plot(aft_fit2, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
+     bty = "n", xlab = "Hour", ylab = "Cumulative Hazard",
+     main = "Weibull Distribution",cex.lab=1.25)
 
+aft_fit3 <- flexsurvreg(Surv(time = hour, event = reason %in% c(2, 3)) ~ 
+                         backup + bridgecrane + servo + trashrack + 
+                         elevation + slope + age, data = kat, 
+                       dist = "exponential")
+plot(aft_fit3, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
+     bty = "n", xlab = "Hour", ylab = "Cumulative Hazard",
+     main = "exponential Distribution",cex.lab=1.25)
 
+# fitting with cox
+# create ID variable
+kat$ID <- 1:nrow(kat)
 
+cox_fit <- coxph(Surv(time = hour, event = reason %in% c(2, 3)) ~ 
+               backup + bridgecrane + servo + trashrack + 
+               elevation + slope + age, data = kat)
+summary(cox_fit)
 
-
+# plot survival curve
+ggsurvplot(survfit(cox_fit), data = kat, legend = "none", break.y.by = 0.1,
+           xlab = "week", ylab = "survival probability")
 
 
 
