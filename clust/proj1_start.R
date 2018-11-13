@@ -6,6 +6,7 @@ library(tidytext)
 library(text2vec)
 library(SnowballC)
 library(wordcloud)
+library(ggfortify)
 library(factoextra)
 
 
@@ -71,15 +72,31 @@ list_scores <- word_per_row %>%
   group_by(listing_id) %>%
   summarise(avg_score = sum(score)/n())
 score_loc_df <- list %>% 
-  select(id, latitude, longitude, price) %>%
+  select(id, latitude, longitude, price, accommodates, review_scores_rating) %>%
   right_join(list_scores, by = c("id" = "listing_id")) %>%
   mutate(latitude = scale(latitude), 
          longitude = scale(longitude), 
-         avg_score = scale(avg_score),
-         price = scale(parse_number(price)))
+         avg_score2 = scale(avg_score),
+         price2 = scale(parse_number(price)/accommodates), # normalize by no. guests
+         avg_score_raw = avg_score,
+         price_raw = parse_number(price),
+         review_score2 = scale(review_scores_rating), # air bnb rating
+         review_score_raw = review_scores_rating)
 set.seed(4151)
 score_loc_samp <- score_loc_df %>%
   sample_n(200)
+
+# Review scores (from air bnb) ------------------------------------------------
+
+df2 <- list %>%
+  filter(id %in% three_plus) %>%
+  select(id, latitude, longitude, price, accommodates, review_scores_rating, review_scores_location) %>%
+  mutate(price = parse_number(price), adj_price = price/accommodates)
+
+df2 %>%
+  select(latitude, longitude, adj_price, review_scores_rating, review_scores_location) %>%
+  scale() %>%
+  fviz_nbclust(kmeans, k.max = 20, method = "silhouette")
   
 
 # CLUSTERING ==================================================================
@@ -101,26 +118,90 @@ score_loc_samp <- score_loc_df %>%
 
 # clustering based location, sentiment score, and price -----------------------
 
-l2dist <- score_loc_df %>%
-  select(-id) %>%
-  dist(method = "euclidean") 
-
 # selecting k
-fviz_nbclust(score_loc_df[, 2:5], hcut, k.max = 20, method = "silhouette") 
-fviz_nbclust(score_loc_df[, 2:5], kmeans, k.max = 20, method = "silhouette")
+score_loc_df %>%
+  select(latitude, longitude, price2, review_score2) %>%
+  fviz_nbclust(hcut, k.max = 20, method = "silhouette") 
+score_loc_df %>%
+  select(latitude, longitude, price2, avg_score2) %>%
+  fviz_nbclust(kmeans, k.max = 20, method = "silhouette")
 
 # create clusters
-h_ward <- hclust(l2dist, method = "ward.D2")
-h_ward_5 <- cutree(h_comp, 5)
-k_5 <- kmeans(score_loc_df[, 2:5], 5)
+l2dist <- score_loc_df %>%
+  select(latitude, longitude, price2, review_score2) %>%
+  dist(method = "euclidean") 
+
+hier_full <- hclust(l2dist, method = "ward.D2")
+hier <- cutree(hier_full, 3)
+
+km <- score_loc_df %>%
+  select(latitude, longitude, price2, review_score2) %>%
+  kmeans(4)
 
 # output results for plotting in Tableau
 clusters <- data_frame(id = score_loc_df$id, 
-                       k_5 = k_5$cluster,
-                       h_ward_5 = h_ward_5,
-                       score = as.vector(score_loc_df$avg_score))
+                       km = km$cluster,
+                       hier = hier,
+                       score = score_loc_df$avg_score_raw,
+                       price = score_loc_df$price_raw)
 write_csv(clusters, "clusters.csv")
 
+words_clusters <- word_per_row %>%
+  left_join(clusters, by = c("listing_id" = "id")) %>%
+  inner_join(word_sent_score, by = "word")
+km_word_counts <- words_clusters %>%
+  group_by(km, word) %>%
+  summarise(count = n())
+hier_word_counts <- words_clusters %>%
+  group_by(hier, word) %>%
+  summarise(count = n())
 
+par(mfrow = c(2, 2), mar = rep(0, 4))
+km_word_counts %>%
+  filter(km == 1) %>%
+  with(wordcloud(word, count, max.words = 20))
+km_word_counts %>%
+  filter(km == 2) %>%
+  with(wordcloud(word, count, max.words = 20))
+km_word_counts %>%
+  filter(km == 3) %>%
+  with(wordcloud(word, count, max.words = 20))
+km_word_counts %>%
+  filter(km == 4) %>%
+  with(wordcloud(word, count, max.words = 20))
+km_word_counts %>%
+  filter(km == 5) %>%
+  with(wordcloud(word, count, max.words = 20))
+dev.off()
 
+par(mfrow = c(2, 3), mar = rep(0, 4))
+hier_word_counts %>%
+  filter(hier == 1) %>%
+  with(wordcloud(word, count, max.words = 20))
+hier_word_counts %>%
+  filter(hier == 2) %>%
+  with(wordcloud(word, count, max.words = 20))
+hier_word_counts %>%
+  filter(hier == 3) %>%
+  with(wordcloud(word, count, max.words = 20))
+hier_word_counts %>%
+  filter(hier == 4) %>%
+  with(wordcloud(word, count, max.words = 20))
+hier_word_counts %>%
+  filter(hier == 5) %>%
+  with(wordcloud(word, count, max.words = 20))
 
+summary(clusters)
+
+clusters %>%
+  group_by(km) %>%
+  summarise(avg_price = mean(price), avg_score = mean(score))
+
+clusters %>%
+  group_by(hier) %>%
+  summarise(avg_price = mean(price), avg_score = mean(score))
+
+score_loc_df %>%
+  select(avg_score2, review_scores_rating) %>%
+  cor
+  
