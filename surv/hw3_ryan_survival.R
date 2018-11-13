@@ -330,6 +330,40 @@ ggsurvplot(survfit(cox_fit), data = kat, legend = "none", break.y.by = 0.1,
 # ph, the actual distance between failure times isnt important because we are
 # looking at hazard ratios. it looks at RANKS of failure times
 
+# Is there any evidence that any of these effects might not
+# be constant over time?
+
+fit_zph <- cox.zph(cox_fit, transform = "km")
+fit_zph # looks like age, trashrack, and backup might be correlated with time 
+        # because of low p values
+plot(fit_zph, var = 'age', lwd = 2)
+abline(h = 0, col = "red") # reference line at 0
+abline(h = cox_fit$coef["age"], col = "purple", lty = 2, lwd = 2) # model estimate
+# conclude age varies with time
+
+plot(fit_zph, var = 'trashrack', lwd = 2)
+abline(h = 0, col = "red") # reference line at 0
+abline(h = cox_fit$coef["trashrack"], col = "purple", lty = 2, lwd = 2) # model estimate
+# conclude trashrack varies with time
+
+plot(fit_zph, var = 'backup', lwd = 2)
+abline(h = 0, col = "red") # reference line at 0
+abline(h = cox_fit$coef["backup"], col = "purple", lty = 2, lwd = 2) # model estimate
+# conclude backup varies with time - however, not as obvious
+
+fit_tdc <- coxph(Surv(hour, event = reason %in% c(2, 3)) ~ 
+                   backup + bridgecrane + servo + trashrack + 
+                   elevation + slope + age, data = kat,
+                   tt = function(x, time, ...){x*log(time)})
+
+
+
+
+
+
+
+
+
 
 
 
