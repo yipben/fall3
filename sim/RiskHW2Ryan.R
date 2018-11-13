@@ -142,14 +142,6 @@ sd(results)
 ########################################################################
 years_ahead = 15
 
-### drilling costs from hw1 ###
-
-initialDrillingCost2006 = 2279.80 * 1000
-currentDrillingCost = 0
-
-### end drilling costs from hw1 ###
-
-
 ### year 0 expenses ###
 
 # seismic and lease costs
@@ -285,9 +277,7 @@ for(j in 1:numberOfIterations){
                                  sd = seismicSectionsPerWell_std)
   revenueInterestRate = rnorm(n = 1, mean = revenueInterestRate_m,
                                  sd = revenueInterestRate_std)
-  professionalCost0 = rtriangle(n=1, profMostLikelyMin, profMostLikelyMax, 
-                                profMostLikelyAvg)
-  professionalCost = rtriangle(n=years_ahead, profMostLikelyMin, profMostLikelyMax, 
+  professionalCost = rtriangle(n=1, profMostLikelyMin, profMostLikelyMax, 
                                profMostLikelyAvg)
   for(i in 1:years_ahead){
     if(i == 1){
@@ -314,7 +304,7 @@ for(j in 1:numberOfIterations){
   annualRevenues =  (1 - taxExpense) * revenueInterestRate * (priceProjections * yearlyProduction)
   netSales = annualRevenues - operatingCosts - professionalCost - drillingCosts
   
-  initialCosts = seismicSectionsCosts + acresCosts + completionCost + professionalCost0
+  initialCosts = seismicSectionsCosts + acresCosts + completionCost + professionalCost
   result1 = rep(0,years_ahead)
   for(i in 1:years_ahead){
     result1[i] = netSales[i]/wacc^i

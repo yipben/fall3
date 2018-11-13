@@ -268,7 +268,14 @@ mean(upgr_these_20$pred_time_diff) # upgrading these pumps gives an average incr
 
 upgr_these_20 %>% arrange(ID)
 
+######################## HW3 ######################## 
 
+# Create both an AFT model and a Cox regression model with the following variables:
+# backup, bridgecrane, servo, trashrack, elevation, slope, age. Which of these models 
+# do you prefer? Why?
+
+
+  
 
 
 
