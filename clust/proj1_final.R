@@ -10,11 +10,8 @@ library(wordcloud)
 library(ggfortify)
 library(factoextra)
 
-
 list <- read_csv("data/listings.csv")
 rev <- read_csv("data/reviews.csv")
-
-# SETUP =======================================================================
 
 # keeping listings with more than three reviews
 three_plus <- rev %>%
@@ -23,7 +20,7 @@ three_plus <- rev %>%
   pull(listing_id)
 rev <- rev %>%
   filter(listing_id %in% three_plus) %>%
-  mutate(lang = detect_language(comments))
+  mutate(lang = detect_language(comments)) # add language col
 
 # add specific stop words
 airbnb_stop_words <- c("boston", "airbnb", "host", "hosts",
@@ -117,14 +114,26 @@ word_per_row2 <- word_per_row %>%
   filter(!(word %in% common_words[1:20]))
 
 # compare wordclouds
-hier9_words <- clusters %>%
+hier9_words1 <- clusters %>%
   select(id, hier9) %>%
   inner_join(word_per_row, by = c("id" = "listing_id")) %>%
   select(id, word, hier9) %>%
   group_by(hier9, word) %>%
   summarise(count = n())
 
-plot_wordcloud <- function(x, color = T) {
+hier9_words2 <- clusters %>%
+  select(id, hier9) %>%
+  inner_join(word_per_row2, by = c("id" = "listing_id")) %>%
+  select(id, word, hier9) %>%
+  group_by(hier9, word) %>%
+  summarise(count = n())
+
+plot_wordcloud <- function(x, color = T, remove_common = T) {
+  if (remove_common) {
+    data <- hier9_words2 
+  } else {
+    data <- hier9_words1
+  }
   if (color) {
     hier9_words %>%
       filter(hier9 == x) %>%
