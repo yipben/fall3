@@ -43,95 +43,77 @@ allmean=mean(as.numeric(All_Return))
 allsd=sd(as.numeric(All_Return))
 
 
-# Kernel Density Estimation for SIMULATION2
-Density.Pt <- density(as.numeric(All_Return), bw="SJ-ste")
-Density.Pt
-kdemodel <- rkde(fhat=kde(as.numeric(All_Return), h=0.07935), n=1000)
 #Histogram of kde of actual returns
 hist(kdemodel, breaks=50, main='Estimated One Year Value Distribution', xlab='Final Value')
 
 
-
 #SIMULATION1 - normal, triangle, triangle
-numberOfIterations = 1000
+numberOfIterations = 10000
 results <- rep(0,numberOfIterations)
-results15 = rep(0,15)
 
+for(i in 1:numberOfIterations){
+  P1=2279.80 #2006
+  r0=rnorm(n=1, mean=allmean, sd=allsd)
+  P2 <- P1*(1+r0)
+  for(j in 2:6){
+    r <- rnorm(n=1, mean=allmean, sd=allsd) #rkde(fhat=kde(P1, h=68.2), n=1000)
+    P2 <- P2*(1+r)
+  }
+
+  for(j in 7:9){
+    r <- rtriangle(n=1, -0.22, -0.07, -0.0917)
+    P2 <- P2*(1+r)
+  }
+
+  for(j in 10:13){
+    r <- rtriangle(n=1, 0.02, 0.06, 0.05)
+    P2 <- P2*(1+r)
+  }
+  results[i] <- P2
+}
+results #10000 runs of 2019
+hist(results, breaks = 200)
+mean(results)
+sd(results)
+
+
+# #SIMULATION2 - kernaldensity, triangle, triangle
+# results <- rep(0,numberOfIterations)
+# 
 # for(i in 1:numberOfIterations){
-# 
-#   P1=2279.80 #2006
-#   r0=rnorm(n=1, mean=allmean, sd=allsd)
+#   #set.seed(12345)
+#   P1=2279.80 * 1000#2006
+#   r0=rkde(fhat=kde(as.numeric(All_Return), h=0.07935), n=1)
 #   P2 <- P1*(1+r0)
-#   results15[1] = P2
 #   #P3=P2
+#   #a=a
 # 
-#   for(j in 2:6){
-#     r <- rnorm(n=1, mean=allmean, sd=allsd) #rkde(fhat=kde(P1, h=68.2), n=1000)
+#   for(j in 1:5){
+#     r <- rkde(fhat=kde(as.numeric(All_Return), h=0.07935), n=1)
 #     P2 <- P2*(1+r)
 #     #P3 <-c(P2,P3)
-#     results15[j] = P2
 #   }
 # 
-#   for(j in 7:9){
+#   for(j in 1:3){
 #     #P3=tail(P3, n=1)
 #     r <- rtriangle(n=1, -0.22, -0.07, -0.0917)
 #     P2 <- P2*(1+r)
 #     #P3 <-c(P2,P3)
-#     results15[j] = P2
 #   }
 # 
-#   for(j in 10:13){
+#   for(j in 1:4){
 #     #P3=tail(P3, n=1)
 #     r <- rtriangle(n=1, 0.02, 0.06, 0.05)
 #     P2 <- P2*(1+r)
-#     results15[j] = P2
-#     #P2=c(P2,P3)
+#     #P3=c(P2,P3)
 #   }
 #   results[i] <- P2
 # }
+# 
 # results #10000 runs of 2019
 # hist(results)
 # mean(results)
 # sd(results)
-
-
-#SIMULATION2 - kernaldensity, triangle, triangle
-results <- rep(0,numberOfIterations)
-
-for(i in 1:numberOfIterations){
-  #set.seed(12345)
-  P1=2279.80 * 1000#2006
-  r0=rkde(fhat=kde(as.numeric(All_Return), h=0.07935), n=1)
-  P2 <- P1*(1+r0)
-  #P3=P2
-  #a=a
-  
-  for(j in 1:5){
-    r <- rkde(fhat=kde(as.numeric(All_Return), h=0.07935), n=1)
-    P2 <- P2*(1+r)
-    #P3 <-c(P2,P3)
-  }
-  
-  for(j in 1:3){
-    #P3=tail(P3, n=1)
-    r <- rtriangle(n=1, -0.22, -0.07, -0.0917)
-    P2 <- P2*(1+r)
-    #P3 <-c(P2,P3)
-  }
-  
-  for(j in 1:4){
-    #P3=tail(P3, n=1)
-    r <- rtriangle(n=1, 0.02, 0.06, 0.05)
-    P2 <- P2*(1+r)
-    #P3=c(P2,P3)
-  }
-  results[i] <- P2
-}
-
-results #10000 runs of 2019
-hist(results)
-mean(results)
-sd(results)
 
 ########################################################################
 #                                                                      #
@@ -212,7 +194,9 @@ for (i in 1:numberOfIterations){
                    professionalCost + drillingCosts
   resultsDryWell[i] = costOfDryWell
 }
-hist(resultsDryWell/1000000)
+dryHist = hist(resultsDryWell/1000000, breaks = 200)
+ApproxQuantile(dryHist, c(0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99)) #quantiles
+range(resultsDryWell)
 
 library(ggplot2)
 library(data.table)
@@ -253,11 +237,11 @@ destandardize <- function(x.std, x){
 
 initProductionBOPD <- rlnorm(n = numberOfIterations, location, shape) # lognormal draw # how does this work with using only one well
 rateOfDecline = runif(n = numberOfIterations, min = rateOfDecline_a, max = rateOfDecline_b)
-initProd_decRate_standard = cbind(standardize(initProductionBOPD), standardize(rateOfDecline))
+initProd_decRate_standard = cbind(standardize(rateOfDecline), standardize(initProductionBOPD))
 corrStruct <- U %*% t(initProd_decRate_standard) # multiplying, altering data to bring in the correlation structure, %*% : matrix multiplication
 corrStruct <- t(corrStruct) # we now have a correlated matrix :)
 
-initProd_declineRate_final <- cbind(destandardize(corrStruct[,1], initProductionBOPD), destandardize(corrStruct[,2], rateOfDecline))
+initProd_declineRate_final <- cbind(destandardize(corrStruct[,1], rateOfDecline), destandardize(corrStruct[,2], initProductionBOPD))
 
 netPresentValue = rep(0, numberOfIterations)
 priceProjections_df = priceProjections_df[1:years_ahead, ]
@@ -280,8 +264,8 @@ for(j in 1:numberOfIterations){
   
   for(i in 1:years_ahead){  
     if(i == 1){
-      yearBegin = initProd_declineRate_final[j,1] #Production Rate
-      declineRate = initProd_declineRate_final[j,2] #Decline Rate
+      yearBegin = initProd_declineRate_final[j,2] #Production Rate
+      declineRate = initProd_declineRate_final[j,1] #Decline Rate
       yearEndRate = (1 - declineRate) * yearBegin  #Year End Rate
       yearlyProduction[i] = 365 * ((yearBegin + yearEndRate) / 2) #Yearly production Volumes in barrels of oil
       
@@ -311,9 +295,9 @@ for(j in 1:numberOfIterations){
   }
   netPresentValue[j] = -initialCosts + sum(result1)
 }
-hist(netPresentValue/1000000) # net present value in millions of dollars
+npvHist = hist(netPresentValue/1000000, breaks = 200) # net present value in millions of dollars
 
-ggplot(as.data.table(netPresentValue), aes(x=netPresentValue)) + 
+ggplot(as.data.table(netPresentValue), aes(x=netPresentValue/1000000)) + 
   geom_histogram(colour="black", fill="slateblue3", alpha=.5) + 
   # xlim(c(0,18000))+
   labs(title="NPV of a Single Wet Well\n", x="\nNPV($)", y="Frequency\n")+
@@ -321,7 +305,9 @@ ggplot(as.data.table(netPresentValue), aes(x=netPresentValue)) +
   theme(axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold"),
         plot.title = element_text(hjust = 0.5, size=16, face="bold"))
 
-
+library(HistogramTools)
+# conclude 95% of wet wells have a future value greater than $4.5 million 
+ApproxQuantile(npvHist, c(0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99)) #quantiles
 
 
 
