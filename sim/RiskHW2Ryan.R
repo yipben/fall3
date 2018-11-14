@@ -214,6 +214,17 @@ for (i in 1:numberOfIterations){
 }
 hist(resultsDryWell)
 
+library(ggplot2)
+library(data.table)
+ggplot(as.data.table(resultsDryWell), aes(x=resultsDryWell)) + 
+  geom_histogram(colour="black", fill="slateblue3", alpha=.5) + 
+  # xlim(c(0,18000))+
+  labs(title="Cost of a Single Dry Well\n", x="\nCost($)", y="Frequency\n")+
+  theme_minimal()+
+  theme(axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold"),
+        plot.title = element_text(hjust = 0.5, size=16))
+
+
 ### net present value of a single wet well ###
 
 
@@ -279,12 +290,13 @@ for(j in 1:numberOfIterations){
                                  sd = revenueInterestRate_std)
   professionalCost = rtriangle(n=1, profMostLikelyMin, profMostLikelyMax, 
                                profMostLikelyAvg)
-  for(i in 1:years_ahead){
+  
+  for(i in 1:years_ahead){  
     if(i == 1){
-      yearBegin = initProd_declineRate_final[j,1]
-      declineRate = initProd_declineRate_final[j,2]
-      yearEndRate = (1 - declineRate) * yearBegin
-      yearlyProduction[i] = 365 * ((yearBegin + yearEndRate) / 2)
+      yearBegin = initProd_declineRate_final[j,1] #Production Rate
+      declineRate = initProd_declineRate_final[j,2] #Decline Rate
+      yearEndRate = (1 - declineRate) * yearBegin  #Year End Rate
+      yearlyProduction[i] = 365 * ((yearBegin + yearEndRate) / 2) #Yearly production Volumes in barrels of oil
       
     }
     else{
@@ -293,7 +305,7 @@ for(j in 1:numberOfIterations){
       yearlyProduction[i] = 365 * ((yearBegin + yearEndRate) / 2)
     }
     
-    priceProjections[i] = rtriangle(n = 1, as.numeric(priceProjections_df[i,3]),
+    priceProjections[i] = rtriangle(n = 1, as.numeric(priceProjections_df[i,3]), #Price Projections
                                   as.numeric(priceProjections_df[i,2]), 
                                   as.numeric(priceProjections_df[i,4]))
   }
@@ -313,7 +325,13 @@ for(j in 1:numberOfIterations){
 }
 hist(netPresentValue/1000000) # net present value in millions of dollars
 
-
+ggplot(as.data.table(netPresentValue), aes(x=netPresentValue)) + 
+  geom_histogram(colour="black", fill="slateblue3", alpha=.5) + 
+  # xlim(c(0,18000))+
+  labs(title="NPV of a Single Wet Well\n", x="\nNPV($)", y="Frequency\n")+
+  theme_minimal()+
+  theme(axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold"),
+        plot.title = element_text(hjust = 0.5, size=16, face="bold"))
 
 
 

@@ -221,12 +221,6 @@ ggplot(as.data.table(resultsDryWell), aes(x=resultsDryWell)) +
         plot.title = element_text(hjust = 0.5, size=16))
 
 ### net present value of a single wet well ###
-leasedAcresPerWell = rnorm(n = 1, mean = leasedAcresPerWell_m, sd = leasedAcresPerWell_std)
-seismicSectionsPerWell = rnorm(n = 1, mean = seismicSectionsPerWell_m, 
-                               sd = seismicSectionsPerWell_std)
-professionalCost = rtriangle(n=1, profMostLikelyMin, profMostLikelyMax, 
-                             profMostLikelyAvg)
-completionCost = rnorm(n = 1, mean = pricePerWellPrep_m, sd = pricePerWellPrep_std)
 
 # fancy stuff to make lognormal draws work
 location <- log(initProd_m^2 / sqrt(initProd_std^2 + initProd_m^2))
@@ -299,7 +293,7 @@ for(j in 1:numberOfIterations){
 }
 hist(netPresentValue/1000000)
 summary(netPresentValue/1000000)
-
+summary(netPresentValue)
 npv = netPresentValue/1000000
 
 ggplot(as.data.table(netPresentValue), aes(x=netPresentValue)) + 
