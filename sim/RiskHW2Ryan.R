@@ -53,7 +53,7 @@ hist(kdemodel, breaks=50, main='Estimated One Year Value Distribution', xlab='Fi
 
 
 #SIMULATION1 - normal, triangle, triangle
-numberOfIterations = 1000
+numberOfIterations = 10000
 results <- rep(0,numberOfIterations)
 results15 = rep(0,15)
 
@@ -129,7 +129,6 @@ for(i in 1:numberOfIterations){
 }
 
 results #10000 runs of 2019
-View(results)
 hist(results)
 mean(results)
 sd(results)
@@ -207,13 +206,13 @@ for (i in 1:numberOfIterations){
                           sd = seismicSectionsPerWell_std)
   professionalCost = rtriangle(n=1, profMostLikelyMin, profMostLikelyMax, 
                                profMostLikelyAvg)
-  drillingCosts = results[j]
+  drillingCosts = results[i]
   costOfDryWell = (pricePerAcre * leasedAcresPerWell) + 
                   (pricePerSeismicSection * seismicSectionsPerWell) + 
                    professionalCost + drillingCosts
   resultsDryWell[i] = costOfDryWell
 }
-hist(resultsDryWell)
+hist(resultsDryWell/1000000)
 
 library(ggplot2)
 library(data.table)
