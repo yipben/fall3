@@ -53,46 +53,46 @@ hist(kdemodel, breaks=50, main='Estimated One Year Value Distribution', xlab='Fi
 
 
 #SIMULATION1 - normal, triangle, triangle
-numberOfIterations = 10000
+numberOfIterations = 1000
 results <- rep(0,numberOfIterations)
 results15 = rep(0,15)
 
-for(i in 1:numberOfIterations){
-  
-  P1=2279.80 #2006
-  r0=rnorm(n=1, mean=allmean, sd=allsd)
-  P2 <- P1*(1+r0)
-  results15[1] = P2
-  #P3=P2
-  
-  for(j in 2:6){
-    r <- rnorm(n=1, mean=allmean, sd=allsd) #rkde(fhat=kde(P1, h=68.2), n=1000)
-    P2 <- P2*(1+r)
-    #P3 <-c(P2,P3)
-    results15[j] = P2
-  }
-  
-  for(j in 7:9){
-    #P3=tail(P3, n=1)
-    r <- rtriangle(n=1, -0.22, -0.07, -0.0917)
-    P2 <- P2*(1+r)
-    #P3 <-c(P2,P3)
-    results15[j] = P2
-  }
-  
-  for(j in 10:13){
-    #P3=tail(P3, n=1)
-    r <- rtriangle(n=1, 0.02, 0.06, 0.05)
-    P2 <- P2*(1+r)
-    results15[j] = P2
-    #P2=c(P2,P3)
-  }
-  results[i] <- P2
-}
-results #10000 runs of 2019
-hist(results)
-mean(results)
-sd(results)
+# for(i in 1:numberOfIterations){
+# 
+#   P1=2279.80 #2006
+#   r0=rnorm(n=1, mean=allmean, sd=allsd)
+#   P2 <- P1*(1+r0)
+#   results15[1] = P2
+#   #P3=P2
+# 
+#   for(j in 2:6){
+#     r <- rnorm(n=1, mean=allmean, sd=allsd) #rkde(fhat=kde(P1, h=68.2), n=1000)
+#     P2 <- P2*(1+r)
+#     #P3 <-c(P2,P3)
+#     results15[j] = P2
+#   }
+# 
+#   for(j in 7:9){
+#     #P3=tail(P3, n=1)
+#     r <- rtriangle(n=1, -0.22, -0.07, -0.0917)
+#     P2 <- P2*(1+r)
+#     #P3 <-c(P2,P3)
+#     results15[j] = P2
+#   }
+# 
+#   for(j in 10:13){
+#     #P3=tail(P3, n=1)
+#     r <- rtriangle(n=1, 0.02, 0.06, 0.05)
+#     P2 <- P2*(1+r)
+#     results15[j] = P2
+#     #P2=c(P2,P3)
+#   }
+#   results[i] <- P2
+# }
+# results #10000 runs of 2019
+# hist(results)
+# mean(results)
+# sd(results)
 
 
 #SIMULATION2 - kernaldensity, triangle, triangle
