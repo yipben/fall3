@@ -207,9 +207,10 @@ for (i in 1:numberOfIterations){
                           sd = seismicSectionsPerWell_std)
   professionalCost = rtriangle(n=1, profMostLikelyMin, profMostLikelyMax, 
                                profMostLikelyAvg)
+  drillingCosts = results[j]
   costOfDryWell = (pricePerAcre * leasedAcresPerWell) + 
                   (pricePerSeismicSection * seismicSectionsPerWell) + 
-                   professionalCost
+                   professionalCost + drillingCosts
   resultsDryWell[i] = costOfDryWell
 }
 hist(resultsDryWell)
@@ -266,21 +267,8 @@ for(j in 1:numberOfIterations){
   priceProjections <- rep(0, years_ahead)
   revenueInterestRate <- rep(0, years_ahead)
   yearlyProduction = rep(0, years_ahead)
-  drillingCosts <- rep(0,years_ahead)
   
-  for(k in 1:years_ahead){
-    if(k == 1){
-      r <- rtriangle(n=1, 0.02, 0.06, 0.05)
-      P2 = results[j] * (1 + r) # results gives us the initial cost we need, from hw1
-      drillingCosts[k] <- P2
-    }
-    else{
-      r <- rtriangle(n=1, 0.02, 0.06, 0.05)
-      P2 <- P2*(1+r)
-      drillingCosts[k] <- P2
-    }
-  }
-  
+  drillingCosts = results[j]
   completionCost = rnorm(n = 1, mean = pricePerWellPrep_m, sd = pricePerWellPrep_std)
   operatingCPB = rnorm(n = years_ahead, mean = operatingCPB_m, sd = operatingCPB_std)
   leasedAcresPerWell = rnorm(n = 1, mean = leasedAcresPerWell_m, sd = leasedAcresPerWell_std)
@@ -314,9 +302,10 @@ for(j in 1:numberOfIterations){
   seismicSectionsCosts = seismicSectionsPerWell * pricePerSeismicSection
   
   annualRevenues =  (1 - taxExpense) * revenueInterestRate * (priceProjections * yearlyProduction)
-  netSales = annualRevenues - operatingCosts - professionalCost - drillingCosts
+  netSales = annualRevenues - operatingCosts - professionalCost
   
-  initialCosts = seismicSectionsCosts + acresCosts + completionCost + professionalCost
+  initialCosts = seismicSectionsCosts + acresCosts + completionCost + professionalCost +
+                                       drillingCosts
   result1 = rep(0,years_ahead)
   for(i in 1:years_ahead){
     result1[i] = netSales[i]/wacc^i
