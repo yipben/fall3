@@ -1,17 +1,17 @@
-library(tm)
 library(cld2)
 library(purrr)
 library(readr)
 library(dplyr)
 library(tidytext)
-library(text2vec)
-library(SnowballC)
 library(wordcloud)
-library(ggfortify)
 library(factoextra)
 
+# *edit these file paths to run*
 list <- read_csv("data/listings.csv")
 rev <- read_csv("data/reviews.csv")
+
+
+# DATA MANIPULATION -----------------------------------------------------------
 
 # keeping listings with more than three reviews
 three_plus <- rev %>%
@@ -22,36 +22,14 @@ rev <- rev %>%
   filter(listing_id %in% three_plus) %>%
   mutate(lang = detect_language(comments)) # add language col
 
-# add specific stop words
-airbnb_stop_words <- c("boston", "airbnb", "host", "hosts",
-                       "apartment", "house", "stay", "time",
-                       "bnb", "city", "street", "night", "stayed",
-                       "staying", tolower(list$host_name))
-airbnb_stop_words_df1 <- data_frame(word = airbnb_stop_words,
-                                    lexicon = "custom")
-stop_words2 <- rbind(stop_words, airbnb_stop_words_df1)
-
-# df w/ one word per row
-word_per_row <- rev %>%
-  filter(lang == "en") %>%
-  unnest_tokens(word, comments) %>%
-  anti_join(stop_words2) %>%
-  filter(!is.na(word)) 
-
-# wordcloud of all reviews
-word_counts <- word_per_row %>%
-  group_by(word) %>%
-  summarise(count = n()) %>%
-  arrange(desc(count))
-wordcloud(word_counts$word, word_counts$count, max.words = 20)
-
-# Review scores (from air bnb) ------------------------------------------------
-
 # create df for clustering
 df2 <- list %>%
   filter(id %in% three_plus) %>%
   select(id, latitude, longitude, price, accommodates, review_scores_rating, review_scores_location) %>%
   mutate(price = parse_number(price), adj_price = price/accommodates)
+
+
+# CLUSTERING ------------------------------------------------------------------
 
 # find k
 df2 %>%
@@ -82,25 +60,44 @@ hier3 <- df2 %>%
   hclust(method = "ward.D2") %>%
   cutree(3)
 
-# output clusters
+# output clusters for plotting in Tableau
 clusters <- df2 %>% mutate(km = km, hier3 = hier3, hier9 = hier9)
 write_csv(clusters, "clusters.csv")
 
 # summary tables
-# clusters %>%
-#   group_by(km) %>%
-#   summarise(avg_price_per = mean(adj_price), avg_rating = mean(review_scores_rating),
-#             avg_loc_rating = mean(review_scores_location), count = n())
-# clusters %>%
-#   group_by(hier3) %>%
-#   summarise(avg_price_per = mean(adj_price), avg_rating = mean(review_scores_rating),
-#             avg_loc_rating = mean(review_scores_location), count = n())
+clusters %>%
+  group_by(km) %>%
+  summarise(avg_price_per = mean(adj_price), avg_rating = mean(review_scores_rating),
+            avg_loc_rating = mean(review_scores_location), count = n())
+clusters %>%
+  group_by(hier3) %>%
+  summarise(avg_price_per = mean(adj_price), avg_rating = mean(review_scores_rating),
+            avg_loc_rating = mean(review_scores_location), count = n())
 clusters %>%
   group_by(hier9) %>%
   summarise(avg_price_per = mean(adj_price), avg_rating = mean(review_scores_rating),
             avg_loc_rating = mean(review_scores_location), count = n())
 
-# remove top 10 words to create more interesting clouds
+
+# WORDCLOUDS ------------------------------------------------------------------
+
+# Boston/air bnb-specific stop words
+airbnb_stop_words <- c("boston", "airbnb", "host", "hosts",
+                       "apartment", "house", "stay", "time",
+                       "bnb", "city", "street", "night", "stayed",
+                       "staying", tolower(list$host_name))
+airbnb_stop_words_df1 <- data_frame(word = airbnb_stop_words,
+                                    lexicon = "custom")
+stop_words2 <- rbind(stop_words, airbnb_stop_words_df1)
+
+# df w/ one word per row
+word_per_row <- rev %>%
+  filter(lang == "en") %>%
+  unnest_tokens(word, comments) %>%
+  anti_join(stop_words2) %>%
+  filter(!is.na(word)) 
+
+# remove top 20 common words to create more interesting clouds
 common_words <- word_per_row %>%
   left_join(clusters, by = c("listing_id" = "id")) %>% 
   group_by(word) %>%
@@ -109,18 +106,16 @@ common_words <- word_per_row %>%
   filter(n_clust == 9) %>%
   select(word) %>%
   pull()
-
 word_per_row2 <- word_per_row %>%
   filter(!(word %in% common_words[1:20]))
 
-# compare wordclouds
+# df's for comparing wordclouds
 hier9_words1 <- clusters %>%
   select(id, hier9) %>%
   inner_join(word_per_row, by = c("id" = "listing_id")) %>%
   select(id, word, hier9) %>%
   group_by(hier9, word) %>%
   summarise(count = n())
-
 hier9_words2 <- clusters %>%
   select(id, hier9) %>%
   inner_join(word_per_row2, by = c("id" = "listing_id")) %>%
@@ -128,6 +123,7 @@ hier9_words2 <- clusters %>%
   group_by(hier9, word) %>%
   summarise(count = n())
 
+# function for plotting wordclouds
 plot_wordcloud <- function(x, color = T, remove_common = T) {
   if (remove_common) {
     data <- hier9_words2 
@@ -145,11 +141,14 @@ plot_wordcloud <- function(x, color = T, remove_common = T) {
   }  
 }
 
-par(mfrow = c(3, 3), mar = rep(0, 4))
+# plot
+par(mfrow = c(3, 3), mar = rep(0, 4)) # plot all in one pane 
 map(as.list(1:9), ~ plot_wordcloud(.x, color = T))
 
-par(mfrow = c(1, 1), mar = rep(0, 4))
+par(mfrow = c(1, 1), mar = rep(0, 4)) # plot one at a time
 map(as.list(1:9), ~ plot_wordcloud(.x, color = T))
+
+
 
 
 
