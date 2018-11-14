@@ -53,7 +53,7 @@ hist(kdemodel, breaks=50, main='Estimated One Year Value Distribution', xlab='Fi
 
 
 #SIMULATION1 - normal, triangle, triangle
-numberOfIterations = 1000
+numberOfIterations = 10000
 results <- rep(0,numberOfIterations)
 results15 = rep(0,15)
 
