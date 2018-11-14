@@ -137,8 +137,10 @@ plot_wordcloud <- function(x, color = T) {
 }
 
 par(mfrow = c(3, 3), mar = rep(0, 4))
-map(as.list(1:9), ~ plot_wordcloud(.x, color = F))
+map(as.list(1:9), ~ plot_wordcloud(.x, color = T))
 
+par(mfrow = c(1, 1), mar = rep(0, 4))
+map(as.list(1:9), ~ plot_wordcloud(.x, color = T))
 
 
 
