@@ -36,7 +36,7 @@ DrillingCost = DrillingCost[32:47,] # 91 - 2006
 All_Return=c(DrillingCost$Oil_Return,DrillingCost$Gas_Return,DrillingCost$DryWell_Return)
 
 #Histogram of actual returns
-hist(as.numeric(All_Return))
+hist(as.numeric(All_Return), breaks = 50)
 
 #Normal parameters for SIMULATION1
 allmean=mean(as.numeric(All_Return))
@@ -44,15 +44,18 @@ allsd=sd(as.numeric(All_Return))
 
 
 #Histogram of kde of actual returns
+Density.Pt <- density(as.numeric(All_Return), bw="SJ-ste")
+Density.Pt
+kdemodel <- rkde(fhat=kde(as.numeric(All_Return), h=0.07935), n=1000)
 hist(kdemodel, breaks=50, main='Estimated One Year Value Distribution', xlab='Final Value')
 
 
 #SIMULATION1 - normal, triangle, triangle
-numberOfIterations = 10000
+numberOfIterations = 1000
 results <- rep(0,numberOfIterations)
 
 for(i in 1:numberOfIterations){
-  P1=2279.80 #2006
+  P1=2279.80 * 1000#2006
   r0=rnorm(n=1, mean=allmean, sd=allsd)
   P2 <- P1*(1+r0)
   for(j in 2:6){
@@ -77,7 +80,7 @@ mean(results)
 sd(results)
 
 
-# #SIMULATION2 - kernaldensity, triangle, triangle
+#SIMULATION2 - kernaldensity, triangle, triangle
 # results <- rep(0,numberOfIterations)
 # 
 # for(i in 1:numberOfIterations){
@@ -111,7 +114,7 @@ sd(results)
 # }
 # 
 # results #10000 runs of 2019
-# hist(results)
+# hist(results, breaks = 200)
 # mean(results)
 # sd(results)
 
