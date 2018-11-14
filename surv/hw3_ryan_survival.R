@@ -12,9 +12,9 @@ kat <- read_csv("data/katrina.csv")
 # create new variables for later on
 kat <- kat %>%
   mutate(reason3 = if_else(reason == 0, "survived",
-                   if_else(reason == 1, "flood", 
-                   if_else(reason == 2, "motor", 
-                   if_else(reason == 3, "surge", "jammed")))),
+                           if_else(reason == 1, "flood", 
+                                   if_else(reason == 2, "motor", 
+                                           if_else(reason == 3, "surge", "jammed")))),
          failed = if_else(survive == 1, 0, 1),
          hour2 = if_else(survive == 1, as.integer(49), hour))
 
@@ -23,7 +23,7 @@ survive <- kat %>%
   filter(reason == 0)
 failed <- kat %>%
   filter(survive == 0)
-  
+
 flood <- kat %>%
   filter(reason == 1)
 motor <- kat %>%
@@ -75,14 +75,14 @@ ggsurvplot(all_fit, fun = "cumhaz")
 
 # exponential
 flood_fit_exponential <- survreg(Surv(time = hour, event = reason == 1) ~  backup +
-                     bridgecrane + servo + trashrack + elevation +
-                     slope + age, data = kat, dist = "exponential")
+                                   bridgecrane + servo + trashrack + elevation +
+                                   slope + age, data = kat, dist = "exponential")
 summary(flood_fit_exponential)
 
 # weibull
 flood_fit_weibull <- survreg(Surv(time = hour, event = reason == 1) ~  backup +
-                       bridgecrane + servo + trashrack + elevation +
-                       slope + age, data = kat, dist = "weibull")
+                               bridgecrane + servo + trashrack + elevation +
+                               slope + age, data = kat, dist = "weibull")
 summary(flood_fit_weibull)
 
 # loglogistic
@@ -93,8 +93,8 @@ summary(flood_fit_loglogist)
 
 # lognormal
 flood_fit_lognormal <- survreg(Surv(time = hour, event = reason == 1) ~  backup +
-                               bridgecrane + servo + trashrack + elevation +
-                               slope + age, data = kat, dist = "lognormal")
+                                 bridgecrane + servo + trashrack + elevation +
+                                 slope + age, data = kat, dist = "lognormal")
 summary(flood_fit_lognormal)
 
 
@@ -103,15 +103,15 @@ summary(flood_fit_lognormal)
 flood_flex_exponential <- flexsurvreg(Surv(time = hour, event = reason == 1) ~ 
                                         backup + bridgecrane + servo + trashrack + 
                                         elevation + slope + age, data = kat, 
-                                        dist = "exponential")
+                                      dist = "exponential")
 plot(flood_flex_exponential, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
      bty = "n", xlab = "hour", ylab = "cumulative hazard",
      main = "exponential distribution")
 
 flood_flex_weibull <- flexsurvreg(Surv(time = hour, event = reason == 1) ~ 
-                                        backup + bridgecrane + servo + trashrack + 
-                                        elevation + slope + age, data = kat, 
-                                        dist = "weibull")
+                                    backup + bridgecrane + servo + trashrack + 
+                                    elevation + slope + age, data = kat, 
+                                  dist = "weibull")
 plot(flood_flex_weibull, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
      bty = "n", xlab = "hour", ylab = "cumulative hazard",
      main = "weibull distribution")
@@ -119,15 +119,15 @@ plot(flood_flex_weibull, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
 flood_flex_loglogist <- flexsurvreg(Surv(time = hour, event = reason == 1) ~ 
                                       backup + bridgecrane + servo + trashrack + 
                                       elevation + slope + age, data = kat, 
-                                      dist = "llogis")
+                                    dist = "llogis")
 plot(flood_flex_loglogist, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
      bty = "n", xlab = "hour", ylab = "cumulative hazard",
      main = "loglogistic distribution")
 
 ### lognormal looks to be the best fit ###
 flood_flex_lognormal <- flexsurvreg(Surv(time = hour, event = reason == 1) ~ 
-                                    backup + bridgecrane + servo + trashrack + 
-                                    elevation + slope + age, data = kat, 
+                                      backup + bridgecrane + servo + trashrack + 
+                                      elevation + slope + age, data = kat, 
                                     dist = "lognormal")
 plot(flood_flex_lognormal, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
      bty = "n", xlab = "Hour", ylab = "Cumulative Hazard",
@@ -267,6 +267,100 @@ upgr_these_20 = rbind(upgr_backup, upgr_servo)
 mean(upgr_these_20$pred_time_diff) # upgrading these pumps gives an average increase of 12.9 hours
 
 upgr_these_20 %>% arrange(ID)
+
+######################## HW3 ######################## 
+
+# Provide a follow-up to your last report and a set of recommendations summarizing 
+# the findings from your analysis. In this assignment, you will model motor and surge 
+# failures together and treat all other failure reasons as censored.
+# In R, do Surv(time = hour, event = reason %in% c(2, 3)).
+
+# Create both an AFT model and a Cox regression model with the following variables:
+# backup, bridgecrane, servo, trashrack, elevation, slope, age. Which of these models 
+# do you prefer? Why?
+
+# none of these fit well
+aft_fit <- flexsurvreg(Surv(time = hour, event = reason %in% c(2, 3)) ~ 
+                         backup + bridgecrane + servo + trashrack + 
+                         elevation + slope + age, data = kat, 
+                       dist = "lognormal")
+plot(aft_fit, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
+     bty = "n", xlab = "Hour", ylab = "Cumulative Hazard",
+     main = "Lognormal Distribution",cex.lab=1.25)
+
+aft_fit1 <- flexsurvreg(Surv(time = hour, event = reason %in% c(2, 3)) ~ 
+                          backup + bridgecrane + servo + trashrack + 
+                          elevation + slope + age, data = kat, 
+                        dist = "llogis")
+plot(aft_fit1, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
+     bty = "n", xlab = "Hour", ylab = "Cumulative Hazard",
+     main = "Log logistic Distribution",cex.lab=1.25)
+
+aft_fit2 <- flexsurvreg(Surv(time = hour, event = reason %in% c(2, 3)) ~ 
+                          backup + bridgecrane + servo + trashrack + 
+                          elevation + slope + age, data = kat, 
+                        dist = "weibull")
+plot(aft_fit2, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
+     bty = "n", xlab = "Hour", ylab = "Cumulative Hazard",
+     main = "Weibull Distribution",cex.lab=1.25)
+
+aft_fit3 <- flexsurvreg(Surv(time = hour, event = reason %in% c(2, 3)) ~ 
+                          backup + bridgecrane + servo + trashrack + 
+                          elevation + slope + age, data = kat, 
+                        dist = "exponential")
+plot(aft_fit3, type = "cumhaz", ci = TRUE, conf.int = FALSE, las = 1,
+     bty = "n", xlab = "Hour", ylab = "Cumulative Hazard",
+     main = "exponential Distribution",cex.lab=1.25)
+
+# fitting with cox
+# create ID variable
+kat$ID <- 1:nrow(kat)
+
+cox_fit <- coxph(Surv(time = hour, event = reason %in% c(2, 3)) ~ 
+                   backup + bridgecrane + servo + trashrack + 
+                   elevation + slope + age, data = kat)
+summary(cox_fit)
+
+# plot survival curve
+ggsurvplot(survfit(cox_fit), data = kat, legend = "none", break.y.by = 0.1,
+           xlab = "week", ylab = "survival probability")
+
+# we want to use the cox model because the survival curve can't be fit with
+# any of the distributions like lognormal expontential etc. also, for a cox
+# ph, the actual distance between failure times isnt important because we are
+# looking at hazard ratios. it looks at RANKS of failure times
+
+# Is there any evidence that any of these effects might not
+# be constant over time?
+
+fit_zph <- cox.zph(cox_fit, transform = "km")
+fit_zph # looks like age, trashrack, and backup might be correlated with time 
+        # because of low p values
+plot(fit_zph, var = 'age', lwd = 2)
+abline(h = 0, col = "red") # reference line at 0
+abline(h = cox_fit$coef["age"], col = "purple", lty = 2, lwd = 2) # model estimate
+# conclude age varies with time
+
+plot(fit_zph, var = 'trashrack', lwd = 2)
+abline(h = 0, col = "red") # reference line at 0
+abline(h = cox_fit$coef["trashrack"], col = "purple", lty = 2, lwd = 2) # model estimate
+# conclude trashrack varies with time
+
+plot(fit_zph, var = 'backup', lwd = 2)
+abline(h = 0, col = "red") # reference line at 0
+abline(h = cox_fit$coef["backup"], col = "purple", lty = 2, lwd = 2) # model estimate
+# conclude backup varies with time - however, not as obvious
+
+fit_tdc <- coxph(Surv(hour, event = reason %in% c(2, 3)) ~ 
+                   backup + bridgecrane + servo + trashrack + 
+                   elevation + slope + age, data = kat,
+                   tt = function(x, time, ...){x*log(time)})
+
+
+
+
+
+
 
 
 

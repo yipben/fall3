@@ -57,42 +57,42 @@ numberOfIterations = 1000
 results <- rep(0,numberOfIterations)
 results15 = rep(0,15)
 
-for(i in 1:numberOfIterations){
-  
-  P1=2279.80 #2006
-  r0=rnorm(n=1, mean=allmean, sd=allsd)
-  P2 <- P1*(1+r0)
-  results15[1] = P2
-  #P3=P2
-  
-  for(j in 2:6){
-    r <- rnorm(n=1, mean=allmean, sd=allsd) #rkde(fhat=kde(P1, h=68.2), n=1000)
-    P2 <- P2*(1+r)
-    #P3 <-c(P2,P3)
-    results15[j] = P2
-  }
-  
-  for(j in 7:9){
-    #P3=tail(P3, n=1)
-    r <- rtriangle(n=1, -0.22, -0.07, -0.0917)
-    P2 <- P2*(1+r)
-    #P3 <-c(P2,P3)
-    results15[j] = P2
-  }
-  
-  for(j in 10:13){
-    #P3=tail(P3, n=1)
-    r <- rtriangle(n=1, 0.02, 0.06, 0.05)
-    P2 <- P2*(1+r)
-    results15[j] = P2
-    #P2=c(P2,P3)
-  }
-  results[i] <- P2
-}
-results #10000 runs of 2019
-hist(results)
-mean(results)
-sd(results)
+# for(i in 1:numberOfIterations){
+# 
+#   P1=2279.80 #2006
+#   r0=rnorm(n=1, mean=allmean, sd=allsd)
+#   P2 <- P1*(1+r0)
+#   results15[1] = P2
+#   #P3=P2
+# 
+#   for(j in 2:6){
+#     r <- rnorm(n=1, mean=allmean, sd=allsd) #rkde(fhat=kde(P1, h=68.2), n=1000)
+#     P2 <- P2*(1+r)
+#     #P3 <-c(P2,P3)
+#     results15[j] = P2
+#   }
+# 
+#   for(j in 7:9){
+#     #P3=tail(P3, n=1)
+#     r <- rtriangle(n=1, -0.22, -0.07, -0.0917)
+#     P2 <- P2*(1+r)
+#     #P3 <-c(P2,P3)
+#     results15[j] = P2
+#   }
+# 
+#   for(j in 10:13){
+#     #P3=tail(P3, n=1)
+#     r <- rtriangle(n=1, 0.02, 0.06, 0.05)
+#     P2 <- P2*(1+r)
+#     results15[j] = P2
+#     #P2=c(P2,P3)
+#   }
+#   results[i] <- P2
+# }
+# results #10000 runs of 2019
+# hist(results)
+# mean(results)
+# sd(results)
 
 
 #SIMULATION2 - kernaldensity, triangle, triangle
@@ -129,7 +129,6 @@ for(i in 1:numberOfIterations){
 }
 
 results #10000 runs of 2019
-View(results)
 hist(results)
 mean(results)
 sd(results)
@@ -207,12 +206,24 @@ for (i in 1:numberOfIterations){
                           sd = seismicSectionsPerWell_std)
   professionalCost = rtriangle(n=1, profMostLikelyMin, profMostLikelyMax, 
                                profMostLikelyAvg)
+  drillingCosts = results[i]
   costOfDryWell = (pricePerAcre * leasedAcresPerWell) + 
                   (pricePerSeismicSection * seismicSectionsPerWell) + 
-                   professionalCost
+                   professionalCost + drillingCosts
   resultsDryWell[i] = costOfDryWell
 }
-hist(resultsDryWell)
+hist(resultsDryWell/1000000)
+
+library(ggplot2)
+library(data.table)
+ggplot(as.data.table(resultsDryWell), aes(x=resultsDryWell)) + 
+  geom_histogram(colour="black", fill="slateblue3", alpha=.5) + 
+  # xlim(c(0,18000))+
+  labs(title="Cost of a Single Dry Well\n", x="\nCost($)", y="Frequency\n")+
+  theme_minimal()+
+  theme(axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold"),
+        plot.title = element_text(hjust = 0.5, size=16))
+
 
 ### net present value of a single wet well ###
 
@@ -255,21 +266,8 @@ for(j in 1:numberOfIterations){
   priceProjections <- rep(0, years_ahead)
   revenueInterestRate <- rep(0, years_ahead)
   yearlyProduction = rep(0, years_ahead)
-  drillingCosts <- rep(0,years_ahead)
   
-  for(k in 1:years_ahead){
-    if(k == 1){
-      r <- rtriangle(n=1, 0.02, 0.06, 0.05)
-      P2 = results[j] * (1 + r) # results gives us the initial cost we need, from hw1
-      drillingCosts[k] <- P2
-    }
-    else{
-      r <- rtriangle(n=1, 0.02, 0.06, 0.05)
-      P2 <- P2*(1+r)
-      drillingCosts[k] <- P2
-    }
-  }
-  
+  drillingCosts = results[j]
   completionCost = rnorm(n = 1, mean = pricePerWellPrep_m, sd = pricePerWellPrep_std)
   operatingCPB = rnorm(n = years_ahead, mean = operatingCPB_m, sd = operatingCPB_std)
   leasedAcresPerWell = rnorm(n = 1, mean = leasedAcresPerWell_m, sd = leasedAcresPerWell_std)
@@ -279,12 +277,13 @@ for(j in 1:numberOfIterations){
                                  sd = revenueInterestRate_std)
   professionalCost = rtriangle(n=1, profMostLikelyMin, profMostLikelyMax, 
                                profMostLikelyAvg)
-  for(i in 1:years_ahead){
+  
+  for(i in 1:years_ahead){  
     if(i == 1){
-      yearBegin = initProd_declineRate_final[j,1]
-      declineRate = initProd_declineRate_final[j,2]
-      yearEndRate = (1 - declineRate) * yearBegin
-      yearlyProduction[i] = 365 * ((yearBegin + yearEndRate) / 2)
+      yearBegin = initProd_declineRate_final[j,1] #Production Rate
+      declineRate = initProd_declineRate_final[j,2] #Decline Rate
+      yearEndRate = (1 - declineRate) * yearBegin  #Year End Rate
+      yearlyProduction[i] = 365 * ((yearBegin + yearEndRate) / 2) #Yearly production Volumes in barrels of oil
       
     }
     else{
@@ -293,7 +292,7 @@ for(j in 1:numberOfIterations){
       yearlyProduction[i] = 365 * ((yearBegin + yearEndRate) / 2)
     }
     
-    priceProjections[i] = rtriangle(n = 1, as.numeric(priceProjections_df[i,3]),
+    priceProjections[i] = rtriangle(n = 1, as.numeric(priceProjections_df[i,3]), #Price Projections
                                   as.numeric(priceProjections_df[i,2]), 
                                   as.numeric(priceProjections_df[i,4]))
   }
@@ -302,9 +301,10 @@ for(j in 1:numberOfIterations){
   seismicSectionsCosts = seismicSectionsPerWell * pricePerSeismicSection
   
   annualRevenues =  (1 - taxExpense) * revenueInterestRate * (priceProjections * yearlyProduction)
-  netSales = annualRevenues - operatingCosts - professionalCost - drillingCosts
+  netSales = annualRevenues - operatingCosts - professionalCost
   
-  initialCosts = seismicSectionsCosts + acresCosts + completionCost + professionalCost
+  initialCosts = seismicSectionsCosts + acresCosts + completionCost + professionalCost +
+                                       drillingCosts
   result1 = rep(0,years_ahead)
   for(i in 1:years_ahead){
     result1[i] = netSales[i]/wacc^i
@@ -313,7 +313,13 @@ for(j in 1:numberOfIterations){
 }
 hist(netPresentValue/1000000) # net present value in millions of dollars
 
-
+ggplot(as.data.table(netPresentValue), aes(x=netPresentValue)) + 
+  geom_histogram(colour="black", fill="slateblue3", alpha=.5) + 
+  # xlim(c(0,18000))+
+  labs(title="NPV of a Single Wet Well\n", x="\nNPV($)", y="Frequency\n")+
+  theme_minimal()+
+  theme(axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold"),
+        plot.title = element_text(hjust = 0.5, size=16, face="bold"))
 
 
 
