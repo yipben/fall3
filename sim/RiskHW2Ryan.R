@@ -51,7 +51,7 @@ hist(kdemodel, breaks=50, main='Estimated One Year Value Distribution', xlab='Fi
 
 
 #SIMULATION1 - normal, triangle, triangle
-numberOfIterations = 1000
+numberOfIterations = 1000000
 results <- rep(0,numberOfIterations)
 
 for(i in 1:numberOfIterations){
@@ -203,12 +203,12 @@ range(resultsDryWell)
 
 library(ggplot2)
 library(data.table)
-ggplot(as.data.table(resultsDryWell), aes(x=resultsDryWell)) + 
+ggplot(as.data.table(resultsDryWell), aes(x=resultsDryWell/1000000)) + 
   geom_histogram(colour="black", fill="slateblue3", alpha=.5) + 
   # xlim(c(0,18000))+
-  labs(title="Cost of a Single Dry Well\n", x="\nCost($)", y="Frequency\n")+
+  labs(title="Simulated Cost of a Single Dry Well\n", x="\nCost($Millions)", y="Frequency\n")+
   theme_minimal()+
-  theme(axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold"),
+  theme(axis.text=element_text(size=13), axis.title=element_text(size=14,face="bold"),
         plot.title = element_text(hjust = 0.5, size=16))
 
 
@@ -303,7 +303,7 @@ npvHist = hist(netPresentValue/1000000, breaks = 200) # net present value in mil
 ggplot(as.data.table(netPresentValue), aes(x=netPresentValue/1000000)) + 
   geom_histogram(colour="black", fill="slateblue3", alpha=.5) + 
   # xlim(c(0,18000))+
-  labs(title="NPV of a Single Wet Well\n", x="\nNPV($)", y="Frequency\n")+
+  labs(title="NPV of a Single Wet Well\n", x="\nNPV($Millions)", y="Frequency\n")+
   theme_minimal()+
   theme(axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold"),
         plot.title = element_text(hjust = 0.5, size=16, face="bold"))
@@ -311,8 +311,7 @@ ggplot(as.data.table(netPresentValue), aes(x=netPresentValue/1000000)) +
 library(HistogramTools)
 # conclude 95% of wet wells have a future value greater than $4.5 million 
 ApproxQuantile(npvHist, c(0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99)) #quantiles
-
-
+summary(netPresentValue)
 
 
 
