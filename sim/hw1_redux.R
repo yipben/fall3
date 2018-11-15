@@ -19,6 +19,7 @@ dc91_06 <- dc %>%
   mutate(oil_return = parse_double(oil_return),                    # convert character to numeric
          gas_return = parse_double(gas_return),
          drywell_return = parse_double(drywell_return))
+write_csv(dc91_06, "data/hw1.csv")
 
 # look at historic returns
 hist_returns <- c(dc91_06$oil_return, dc91_06$gas_return, dc91_06$drywell_return)
