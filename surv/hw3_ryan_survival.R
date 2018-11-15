@@ -270,8 +270,8 @@ upgr_these_20 %>% arrange(ID)
 
 ######################## HW3 ######################## 
 
-# Provide a follow-up to your last report and a set of recommendations summarizing 
-# the findings from your analysis. In this assignment, you will model motor and surge 
+# Provide a follow-up to your last report and a set of recommendations summarizing
+# the findings from your analysis. In this assignment, you will model motor and surge
 # failures together and treat all other failure reasons as censored.
 # In R, do Surv(time = hour, event = reason %in% c(2, 3)).
 
