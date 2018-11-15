@@ -10,6 +10,7 @@ library(lubridate)
 excel_sheets("data/Analysis_Data.xlsx")
 dc <- read_excel("data/Analysis_Data.xlsx", sheet = "Drilling Cost", skip = 2)
 
+# Posture data
 # str(dc)
 dc91_06 <- dc %>%
   rename(date = 1, oil_cost = 2, gas_cost = 3, drywell_cost = 4,
@@ -19,6 +20,7 @@ dc91_06 <- dc %>%
          gas_return = parse_double(gas_return),
          drywell_return = parse_double(drywell_return))
 
+# look at historic returns
 hist_returns <- c(dc91_06$oil_return, dc91_06$gas_return, dc91_06$drywell_return)
 
 ggplot() + 
@@ -32,22 +34,12 @@ qplot(sample = hist_returns) +
 # Calculate values for normal Dist
 xbar <- mean(hist_returns)
 sig_hat <- sd(hist_returns)
+
+# initial cost
 cost06 <- dc91_06 %>%
   filter(year(date) == 2006) %>%
   select(oil_cost, gas_cost, drywell_cost) %>%
   rowMeans()
-
-
-# Example function ============================================================
-ex <- function(n = 3) {
-  c <- 1
-  cum_cost <- function(r) {
-    c <<- c * (1 + r)
-  }
-  returns06_11 <- rerun(n, c(.05, .25))
-  map_dfc(returns06_11, cum_cost)
-}
-# =============================================================================
 
 
 # SIMULATION 1 ----------------------------------------------------------------
@@ -65,7 +57,7 @@ run_sim1 <- function(n = 1000) {
   # generate returns for each period
   returns06_11 <- rerun(6, rnorm(n, mean = xbar, sd = sig_hat))
   returns12_14 <- rerun(3, rtriangle(n, -0.22, -0.07, -0.0917))
-  returns15_18 <- rerun(5, rtriangle(n, 0.02, 0.06, 0.05))
+  returns15_18 <- rerun(4, rtriangle(n, 0.02, 0.06, 0.05))
   
   # calculate costs
   cost07_12 <- map_dfc(returns06_11, cum_cost)
@@ -100,9 +92,9 @@ run_sim2 <- function(n = 1000) {
   }
   
   # generate returns for each period
-  returns06_11 <- rerun(6, rkde(n, fhat = sim2_kde))
+  returns06_11 <- rerun(6, rkde(n, fhat = sim2_kde)) # only diff. from sim1
   returns12_14 <- rerun(3, rtriangle(n, -0.22, -0.07, -0.0917))
-  returns15_18 <- rerun(5, rtriangle(n, 0.02, 0.06, 0.05))
+  returns15_18 <- rerun(4, rtriangle(n, 0.02, 0.06, 0.05))
   
   # calculate costs
   cost07_12 <- map_dfc(returns06_11, cum_cost)
@@ -117,3 +109,15 @@ sim2_results <- run_sim2(1000000)
 
 ggplot() +
   geom_histogram(aes(sim2_results), bins = 100)
+
+
+# Example function ============================================================
+# ex <- function(n = 3) {
+#   c <- 1
+#   cum_cost <- function(r) {
+#     c <<- c * (1 + r)
+#   }
+#   returns <- rerun(n, c(.05, .25))
+#   map_dfc(returns, cum_cost)
+# }
+# =============================================================================
