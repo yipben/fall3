@@ -198,8 +198,8 @@ for (i in 1:numberOfIterations){
   resultsDryWell[i] = costOfDryWell
 }
 dryHist = hist(resultsDryWell/1000000, breaks = 200)
-ApproxQuantile(dryHist, c(0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99)) #quantiles
-range(resultsDryWell)
+ApproxQuantile(dryHist, c(0.001, 0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99, 0.999)) #quantiles
+summary(resultsDryWell)
 
 library(ggplot2)
 library(data.table)
@@ -310,7 +310,7 @@ ggplot(as.data.table(netPresentValue), aes(x=netPresentValue/1000000)) +
 
 library(HistogramTools)
 # conclude 95% of wet wells have a future value greater than $4.5 million 
-ApproxQuantile(npvHist, c(0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99)) #quantiles
+ApproxQuantile(npvHist, c(0.001, 0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99, 0.999)) #quantiles
 summary(netPresentValue)
 
 
