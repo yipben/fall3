@@ -357,6 +357,7 @@ abline(h = cox_fit$coef["backup"], col = "purple", lty = 2, lwd = 2) # model est
 #                    tt = function(x, time, ...){x*log(time)})
 
 running_pumps = NULL
+kat$running_long = 0
 
 for(i in 1:770){
   if(kat[i, 'failed'] == 1){
@@ -376,7 +377,8 @@ for(i in 1:770){
              as.integer(kat[i, paste0('h', hour_failed - 9)]) == 1 &&
              as.integer(kat[i, paste0('h', hour_failed - 10)]) == 1 &&
              as.integer(kat[i, paste0('h', hour_failed - 11)]) == 1){
-            running_pumps = rbind(running_pumps, kat[i, ])
+            kat[i, 'running_long'] = 1
+            #running_pumps = rbind(running_pumps, kat[i, ])
           }
         }
       }
@@ -385,6 +387,11 @@ for(i in 1:770){
 }
 
 
+long_fit <- survfit(Surv(hour, reason3 == 'motor') ~ running_long, data = kat[kat$reason != 0,])
+reason_labels = c('Motor Failure', 'Motor failure with pump running last 12 hours')
+ggsurvplot(long_fit, conf.int = TRUE, palette = "Set1",legend='top',
+           legend.title = 'Reason for Failure: ', legend.labs = reason_labels,
+           xlab='Time (hours)') # Figure 2
 
 
 
