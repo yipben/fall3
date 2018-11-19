@@ -387,15 +387,17 @@ for(i in 1:770){
 }
 
 
-long_fit <- survfit(Surv(hour, reason3 == 'motor') ~ running_long, data = kat[kat$reason != 0,])
-reason_labels = c('Motor Failure', 'Motor failure with pump running last 12 hours')
+long_fit <- survfit(Surv(hour, reason %in% c(2, 3)) ~ running_long, data = kat[kat$reason != 0,])
+reason_labels = c('Motor or Surge Failure', 'Motor failure with pump running last 12 hours')
 ggsurvplot(long_fit, conf.int = TRUE, palette = "Set1",legend='top',
            legend.title = 'Reason for Failure: ', legend.labs = reason_labels,
            xlab='Time (hours)') # Figure 2
 
-
-
-
+cox_fit2 <- coxph(Surv(time = hour, event = reason %in% c(2, 3)) ~ 
+                   backup + bridgecrane + servo + trashrack + 
+                   elevation + slope + age + running_long, data = kat)
+summary(cox_fit2)
+summary(cox_fit)
 
 
 
