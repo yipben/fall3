@@ -393,11 +393,6 @@ ggsurvplot(long_fit, conf.int = TRUE, palette = "Set1",legend='top',
            legend.title = 'Reason for Failure: ', legend.labs = reason_labels,
            xlab='Time (hours)') # Figure 2
 
-cox_fit2 <- coxph(Surv(time = hour, event = reason %in% c(2, 3)) ~ 
-                   backup + bridgecrane + servo + trashrack + 
-                   elevation + slope + age + running_long, data = kat)
-summary(cox_fit2)
-summary(cox_fit)
 
 
 
