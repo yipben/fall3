@@ -401,9 +401,15 @@ ggsurvplot(long_fit, conf.int = TRUE, palette = "Set1",legend='top',
            xlab='Time (hours)') # Figure 2
 
 
+cox_fit2 <- coxph(Surv(time = hour, event = reason %in% c(2, 3)) ~ 
+                   backup + bridgecrane + servo + trashrack + 
+                   elevation + slope + age + running_long, data = kat)
+summary(cox_fit2)
 
-
-
+#survival curve
+ggsurvplot(survfit(cox_fit2), data = kat, legend = "none", break.y.by = 0.1,
+           xlab = "\nWeek", ylab = "Survival Probability \n", title="Survival Curve Over Time",
+           ggtheme=theme_minimal() + theme(plot.title =element_text(hjust=.5, face="bold", size=15), axis.title = element_text(size=13)))
 
 
 
