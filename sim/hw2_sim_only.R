@@ -150,7 +150,7 @@ make_npv_sim <- function(end_yr = 2033, tax = .046) {
 }
 
 sim_wet_npv <- make_npv_sim()
-sim_wet_npv(30)
+
 
 
 
