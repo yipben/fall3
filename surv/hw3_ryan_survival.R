@@ -351,15 +351,47 @@ abline(h = 0, col = "red") # reference line at 0
 abline(h = cox_fit$coef["backup"], col = "purple", lty = 2, lwd = 2) # model estimate
 # conclude backup varies with time - however, not as obvious
 
-fit_tdc <- coxph(Surv(hour, event = reason %in% c(2, 3)) ~ 
-                   backup + bridgecrane + servo + trashrack + 
-                   elevation + slope + age, data = kat,
-                   tt = function(x, time, ...){x*log(time)})
+# fit_tdc <- coxph(Surv(hour, event = reason %in% c(2, 3)) ~ 
+#                    backup + bridgecrane + servo + trashrack + 
+#                    elevation + slope + age, data = kat,
+#                    tt = function(x, time, ...){x*log(time)})
+
+running_pumps = NULL
+kat$running_long = 0
+
+for(i in 1:770){
+  if(kat[i, 'failed'] == 1){
+    hour_failed = as.integer(kat[i, 'hour']) - 1
+    if(hour_failed != 0){
+      if(is.na(kat[i, paste0('h', hour_failed)]) == FALSE){
+        if(hour_failed - 12 >= 0){
+          if(as.integer(kat[i, paste0('h', hour_failed)]) == 1 &&
+             as.integer(kat[i, paste0('h', hour_failed - 1)]) == 1 &&
+             as.integer(kat[i, paste0('h', hour_failed - 2)]) == 1 &&
+             as.integer(kat[i, paste0('h', hour_failed - 3)]) == 1 &&
+             as.integer(kat[i, paste0('h', hour_failed - 4)]) == 1 && 
+             as.integer(kat[i, paste0('h', hour_failed - 5)]) == 1 &&
+             as.integer(kat[i, paste0('h', hour_failed - 6)]) == 1 &&
+             as.integer(kat[i, paste0('h', hour_failed - 7)]) == 1 &&
+             as.integer(kat[i, paste0('h', hour_failed - 8)]) == 1 &&
+             as.integer(kat[i, paste0('h', hour_failed - 9)]) == 1 &&
+             as.integer(kat[i, paste0('h', hour_failed - 10)]) == 1 &&
+             as.integer(kat[i, paste0('h', hour_failed - 11)]) == 1){
+            kat[i, 'running_long'] = 1
+            #running_pumps = rbind(running_pumps, kat[i, ])
+          }
+        }
+      }
+    }
+  }
+}
 
 
-
-
-
+long_fit <- survfit(Surv(hour, reason %in% c(2, 3)) ~ running_long, data = kat[kat$reason != 0,])
+reason_labels = c('Motor or Surge Failure', 'Motor failure with pump running last 12 hours')
+ggsurvplot(long_fit, conf.int = TRUE, palette = "Set1",legend='top',
+           legend.title = 'Reason for Failure: ', legend.labs = reason_labels,
+           xlab='Time (hours)') # Figure 2
 
 
 
