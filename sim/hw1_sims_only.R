@@ -3,6 +3,7 @@ library(readr)
 library(purrr)
 library(dplyr)
 library(triangle)
+library(lubridate)
 
 make_hw1_sim <- function(kernel = F) {
   
