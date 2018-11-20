@@ -45,7 +45,9 @@ fviz_nbclust(pca$scores, kmeans, method = "silhouette") # 2
 # WSS is a measure of the homogeneity within the cluster. they measure differnt things
 
 
-# not sure where to go from here. question c below is confusing.
+# not sure where to go from here. question c below is confusing. the code
+# below is copied from class code
+# not sure what he wants
 
 
 
