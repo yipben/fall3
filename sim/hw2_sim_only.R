@@ -7,15 +7,7 @@ source("hw1_sims_only.R")
 
 # Helper functions (from Dr. LaBarr) ------------------------------------------
 
-stdz <- function(x) {
-  x_std = (x - mean(x)) / sd(x)
-  x_std
-}
 
-dstdz <- function(x_std, x) {
-  x_old = (x_std * sd(x)) + mean(x)
-  return(x_old)
-}
 
 # -----------------------------------------------------------------------------
 
@@ -47,6 +39,16 @@ make_npv_sim <- function(end_yr = 2033, tax = .046) {
   time_range <- 2019:end_yr
   n_years <- length(time_range)
   price_data <- read_excel("data/Analysis_Data.xlsx", sheet = "Price Projections", skip = 2)
+  
+  stdz <- function(x) {
+     x_std = (x - mean(x)) / sd(x)
+     x_std
+  }
+
+  dstdz <- function(x_std, x) {
+     x_old = (x_std * sd(x)) + mean(x)
+     x_old
+  }
   
   init_prod_dr <- function(x) {
     
