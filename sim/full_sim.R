@@ -84,7 +84,9 @@ ggplot() +
     y = "Frequency",
     title = "One Million Simulations of Net Present Value (NPV)"
   ) +
-  theme(text = element_text(size = 18))
+  theme(
+    text = element_text(size = 18)
+  )
 
 # mean(one_mil_sim_results$npv, na.rm = T)
 # sum(is.na(one_mil_sim_results$npv))
@@ -110,24 +112,42 @@ boot <- function(stat = "var") {
   }
 }
 
-# 1,000 takes ~00:01:00 | 10,000 takes ~ 00:10:30 |
+# 1,000 takes ~00:01:00 | 10,000 takes ~00:10:30 | 100,000 takes ~01:57:00
 tic()
 set.seed(8)
-VaR_estimates <- unlist(rerun(10000, boot()))
+VaR_estimates <- unlist(rerun(100000, boot()))
 toc()
 
-# 1,000 takes ~00:02:21 | 10,000 takes ~ 00:10:30 |
-tic()
-set.seed(8)
-es_estimates <- unlist(rerun(1000, boot(stat = "es")))
-toc()
+# saveRDS(VaR_estimates, file = "VaR_estimates.rds")
+VaR_estimates <- readRDS("VaR_estimates.rds")
+
+# 1,000 takes ~00:02:21 | 10,000 takes ~ 00:10:30 | 100,000 takes ~04:00:00
+# tic()
+# set.seed(8)
+# es_estimates <- unlist(rerun(100000, boot(stat = "es")))
+# toc()
+# 
+# saveRDS(es_estimates, file = "es_estimates.rds")
+es_estimates <- readRDS("es_estimates.rds")
+
 # =============================================================================
 
 
 # PLOT BOOTSTRAP RESULTS ------------------------------------------------------
 
+# quantiles
+VaR_q_05 <- quantile(VaR_estimates, .05)/1000000
+VaR_q_95 <- quantile(VaR_estimates, .95)/1000000
+es_q_05 <- quantile(es_estimates, .05, na.rm = T)/1000000
+es_q_95 <- quantile(es_estimates, .95, na.rm = T)/1000000
+
 # value at risk
 ggplot() + 
+  geom_area(
+    aes(x = c(VaR_q_05, VaR_q_95), y = 9500), # y = 9500 so area extends to top
+    fill = "red",
+    alpha = .1
+  ) +
   geom_histogram(
     aes(VaR_estimates/1000000), 
     bins = 50,
@@ -144,16 +164,22 @@ ggplot() +
     text = element_text(size = 18)
   ) +
   geom_vline(
-    xintercept = quantile(VaR_estimates/1000000, .05),
-    linetype = "dashed"
+    xintercept = mean(VaR_estimates)/1000000,
+    linetype = "dashed",
+    color = "red",
+    size = .75
   ) +
-  geom_vline(
-    xintercept = quantile(VaR_estimates/1000000, .95),
-    linetype = "dashed"
+  coord_cartesian(
+    ylim = c(0, 8900)
   )
 
 # expected shortfall
 ggplot() + 
+  geom_area(
+    aes(x = c(es_q_05, es_q_95), y = 8000), # y = 9500 so area extends to top
+    fill = "orange",
+    alpha = .15
+  ) +
   geom_histogram(
     aes(es_estimates/1000000), 
     bins = 50,
@@ -170,11 +196,44 @@ ggplot() +
     text = element_text(size = 18)
   ) +
   geom_vline(
-    xintercept = quantile(es_estimates/1000000, .05, na.rm = T),
-    linetype = "dashed"
+    xintercept = mean(es_estimates)/1000000,
+    linetype = "dotted",
+    color = "orange",
+    size = .75
   ) +
-  geom_vline(
-    xintercept = quantile(es_estimates/1000000, .95, na.rm = T),
-    linetype = "dashed"
+  coord_cartesian(
+    ylim = c(0, 7000)
   )
 
+
+
+# NPV w/ VaR, CVaR ------------------------------------------------------------
+
+ggplot() + 
+  geom_histogram(
+    aes(one_mil_sim_results$npv/1000000), 
+    bins = 50,
+    colour = "black", 
+    fill = "sky blue",
+    alpha = .5
+  ) +
+  labs(
+    x = "Net Present Value (millions)",
+    y = "Frequency",
+    title = "One Million Simulations of Net Present Value (NPV)"
+  ) +
+  theme(
+    text = element_text(size = 18)
+  ) +
+  geom_vline(
+    xintercept = mean(VaR_estimates)/1000000,
+    linetype = "dashed",
+    color = "red",
+    size = .75
+  ) +
+  geom_vline(
+    xintercept = mean(es_estimates)/1000000,
+    linetype = "dotted",
+    color = "orange",
+    size = .75
+  ) 
