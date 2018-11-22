@@ -113,10 +113,10 @@ boot <- function(stat = "var") {
 }
 
 # 1,000 takes ~00:01:00 | 10,000 takes ~00:10:30 | 100,000 takes ~01:57:00
-tic()
-set.seed(8)
-VaR_estimates <- unlist(rerun(100000, boot()))
-toc()
+# tic()
+# set.seed(8)
+# VaR_estimates <- unlist(rerun(100000, boot()))
+# toc()
 
 # saveRDS(VaR_estimates, file = "VaR_estimates.rds")
 VaR_estimates <- readRDS("VaR_estimates.rds")
