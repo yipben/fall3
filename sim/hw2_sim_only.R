@@ -3,14 +3,8 @@ library(purrr)
 library(readxl)
 library(triangle)
 
+# load sim code from hw1
 source("hw1_sims_only.R")
-
-# Helper functions (from Dr. LaBarr) ------------------------------------------
-
-
-
-# -----------------------------------------------------------------------------
-
 
 sim_base_cost <- function(n_wells) {
   

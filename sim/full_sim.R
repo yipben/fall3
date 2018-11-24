@@ -3,6 +3,7 @@ library(purrr)
 library(tictoc)
 library(ggplot2)
 
+# load sim code from hw2
 source("hw2_sim_only.R")
 
 run_full_sim <- function(n) {
