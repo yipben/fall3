@@ -58,7 +58,7 @@ fviz_nbclust(pca$scores, kmeans, method = "silhouette") # 2
 # c) Run the command "set.seed(12345)" and run a k-means clustering algorithm using the
 # pca scores
 set.seed(12345)
-spiro <- read_csv("spiro.csv", col_names = FALSE)
+spiro <- read_csv("data\\spiro.csv", col_names = FALSE)
 sp <- spiro[1:10000,18:151] #get the actual data only worry about the first
 #10,000 observations
 times <- seq(1,134)/100 # Observations in 1/100th of a second
