@@ -159,7 +159,7 @@ ggplot() +
   labs(
     x = "Value at Risk (millions)",
     y = "Frequency",
-    title = "Bootstrap results for Value at Rist (VaR)"
+    title = "Bootstrap results for Value at Rist (VaR) [100,000 samples]"
   ) +
   theme(
     text = element_text(size = 18)
@@ -191,7 +191,7 @@ ggplot() +
   labs(
     x = "Expected Shortfall (millions)",
     y = "Frequency",
-    title = "Bootstrap results for Expected Shortfall (ES)"
+    title = "Bootstrap results for Expected Shortfall (ES) [100,000 samples]"
   ) +
   theme(
     text = element_text(size = 18)
@@ -200,7 +200,7 @@ ggplot() +
     xintercept = mean(es_estimates)/1000000,
     linetype = "dotted",
     color = "orange",
-    size = .75
+    size = 1
   ) +
   coord_cartesian(
     ylim = c(0, 7000)
