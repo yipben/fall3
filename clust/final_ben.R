@@ -113,6 +113,7 @@ summary(BIC)
 # provide a graph of each cluster's mean curve (USING ALL OF THE DATA COLUMNS). 
 # Put all plots on one graph.
 
+set.seed(12345)
 mm <- Mclust(cdata[, 10:20], G = 6, modelNames = "VVV")
 cluster <- mm$classification
 cdata_mm <- cbind(cdata, cluster)
@@ -124,12 +125,12 @@ cdata_mm %>%
   rename_at(2:61 , ~ paste0("b", 1:60))
 
 # creating df for plotting
-Y <- apply(mm_clust_means, 1, calc_y)
+Y_mm <- apply(mm_clust_means, 1, calc_y)
 mm_plot_df <- 
   data_frame(
     time = rep(times, 6),
     cluster = unlist(map(as.list(1:6), ~ rep(.x, 295))),
-    y = c(Y)
+    y = c(Y_mm)
   )
 
 # plotting results
