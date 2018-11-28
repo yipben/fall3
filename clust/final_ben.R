@@ -26,7 +26,7 @@ cdata <- cbind(final_data[, 1:5], betas)
 #CONVERT EVERTYING TO 'numbers'
 cdata$AGE <- as.numeric(cdata$AGE)
 cdata$EVER_SMOKE <- as.numeric(cdata$EVER_SMOKE)
-cdata$ASTHMA <- as.numeric(cdata$EVER_SMOKE)
+cdata$ASTHMA <- as.numeric(cdata$ASTHMA)
 cdata$POVERTY_RATIO <- as.numeric(cdata$POVERTY_RATIO)
 
 # =============================================================================
