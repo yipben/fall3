@@ -63,11 +63,11 @@ km_clust_means <-
 
 # function for calcuating y-values for each cluster
 calc_y <- function(row) {
-  b <- matrix(as.numeric(row[2:61]), ncol = 1)
+  b <- matrix(as.numeric(row), ncol = 1)
   X %*% b
 }
 
-Y_km <- apply(km_clust_means, 1, calc_y)
+Y_km <- apply(km_clust_means[2:61], 1, calc_y)
 km_plot_df <- 
   data_frame(
     time = rep(times, 4),
@@ -125,7 +125,7 @@ cdata_mm %>%
   rename_at(2:61 , ~ paste0("b", 1:60))
 
 # creating df for plotting
-Y_mm <- apply(mm_clust_means, 1, calc_y)
+Y_mm <- apply(mm_clust_means[2:61], 1, calc_y)
 mm_plot_df <- 
   data_frame(
     time = rep(times, 6),
@@ -140,10 +140,18 @@ ggplot(mm_plot_df, aes(time, y, color = as.factor(cluster))) +
   ylab("ML")
 
 
-# TO-DO ***********************************************************************
-# To answer the remaining questions I think we just need to look at the 
-# dataframes cdata_mm and cdata_km and calculate some basic summary stats 
-# to compare between clusters
+# Comparing clusters ----------------------------------------------------------
+
+cdata_km %>%
+  group_by(cluster) %>%
+  summarise_at(2:5, mean) %>%
+  write_csv("km_summary.csv")
+
+cdata_mm %>%
+  group_by(cluster) %>%
+  summarise_at(2:5, mean) %>%
+  write_csv("mm_summary.csv")
+
 
 
 
