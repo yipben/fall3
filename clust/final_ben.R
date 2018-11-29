@@ -71,7 +71,7 @@ Y_km <- apply(km_clust_means, 1, calc_y)
 km_plot_df <- 
   data_frame(
     time = rep(times, 4),
-    cluster = unlist(map(as.list(1:4), ~ rep(.x, 295))),
+    cluster = unlist(purrr::map(as.list(1:4), ~ rep(.x, 295))),
     y = c(Y_km)
   )
 
@@ -129,7 +129,7 @@ Y_mm <- apply(mm_clust_means, 1, calc_y)
 mm_plot_df <- 
   data_frame(
     time = rep(times, 6),
-    cluster = unlist(map(as.list(1:6), ~ rep(.x, 295))),
+    cluster = unlist(purrr::map(as.list(1:6), ~ rep(.x, 295))),
     y = c(Y_mm)
   )
 
